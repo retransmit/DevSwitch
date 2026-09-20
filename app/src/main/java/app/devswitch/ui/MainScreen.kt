@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -34,10 +36,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -58,6 +58,7 @@ import app.devswitch.WirelessViewModel
 import app.devswitch.shizuku.ShizukuBridge
 import app.devswitch.shizuku.ShizukuStatus
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun MainScreen(
@@ -66,7 +67,8 @@ fun MainScreen(
 ) {
     val ui by viewModel.ui.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
-    var tab by rememberSaveable { mutableIntStateOf(0) }
+    val pagerState = rememberPagerState(pageCount = { 2 })
+    val scope = rememberCoroutineScope()
 
     // Coming back from a terminal, Shizuku or a root prompt is when the permission state changes.
     LifecycleResumeEffect(Unit) {
@@ -97,11 +99,11 @@ fun MainScreen(
         topBar = {
             Column {
                 TopAppBar(title = { Text(stringResource(R.string.app_name)) })
-                TabRow(selectedTabIndex = tab) {
+                TabRow(selectedTabIndex = pagerState.currentPage) {
                     tabs.forEachIndexed { index, title ->
                         Tab(
-                            selected = tab == index,
-                            onClick = { tab = index },
+                            selected = pagerState.currentPage == index,
+                            onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
                             text = { Text(title) },
                         )
                     }
@@ -110,9 +112,11 @@ fun MainScreen(
         },
         snackbarHost = { SnackbarHost(snackbar) },
     ) { padding ->
-        when (tab) {
-            0 -> SwitchesTab(ui, viewModel, Modifier.padding(padding))
-            else -> WirelessTab(wirelessViewModel, Modifier.padding(padding))
+        HorizontalPager(state = pagerState, modifier = Modifier.padding(padding)) { page ->
+            when (page) {
+                0 -> SwitchesTab(ui, viewModel)
+                else -> WirelessTab(wirelessViewModel)
+            }
         }
     }
 }
