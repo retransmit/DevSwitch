@@ -56,8 +56,14 @@ dependencies {
     implementation("androidx.compose.material3:material3:1.4.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0")
 
-    // QR image for the in-app wireless pairing flow.
+    // QR image for the in-app wireless pairing flow, and decoding a scanned QR.
     implementation("com.google.zxing:core:3.5.4")
+
+    // Camera preview and frame analysis to scan Android Studio's pairing QR.
+    implementation("androidx.camera:camera-core:1.6.1")
+    implementation("androidx.camera:camera-camera2:1.6.1")
+    implementation("androidx.camera:camera-lifecycle:1.6.1")
+    implementation("androidx.camera:camera-view:1.6.1")
 
     // Lets the app grant itself WRITE_SECURE_SETTINGS on-device (no computer) when Shizuku runs.
     implementation("dev.rikka.shizuku:api:13.1.5")

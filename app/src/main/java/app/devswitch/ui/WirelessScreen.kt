@@ -1,9 +1,11 @@
 package app.devswitch.ui
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.provider.Settings
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -28,15 +29,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.devswitch.PairingSession
 import app.devswitch.WirelessUiState
@@ -47,7 +50,6 @@ import app.devswitch.wireless.AdbServiceType
 import app.devswitch.wireless.DiscoveredService
 import app.devswitch.wireless.NetworkStatus
 import app.devswitch.wireless.PairedDevice
-import app.devswitch.wireless.QrImage
 
 @Composable
 fun WirelessTab(
@@ -55,6 +57,7 @@ fun WirelessTab(
     modifier: Modifier = Modifier,
 ) {
     val ui by viewModel.ui.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     // Scan and offer pairing only while this tab is on screen.
     DisposableEffect(Unit) {
@@ -65,6 +68,38 @@ fun WirelessTab(
         if (ui.pairingMessage != null) {
             kotlinx.coroutines.delay(5_000)
             viewModel.clearPairingMessage()
+        }
+    }
+
+    var scanning by remember { mutableStateOf(false) }
+    val cameraPermission = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        if (granted) scanning = true else viewModel.reportPairingMessage("Camera permission is needed to scan the QR.")
+    }
+    fun requestScan() {
+        val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
+            PackageManager.PERMISSION_GRANTED
+        if (granted) scanning = true else cameraPermission.launch(Manifest.permission.CAMERA)
+    }
+
+    if (scanning) {
+        Dialog(
+            onDismissRequest = { scanning = false },
+            properties = DialogProperties(usePlatformDefaultWidth = false),
+        ) {
+            QrScannerOverlay(
+                onResult = { text ->
+                    scanning = false
+                    val parsed = parseAdbPairingQr(text)
+                    if (parsed != null) {
+                        viewModel.pairWithScannedQr(parsed.first, parsed.second)
+                    } else {
+                        viewModel.reportPairingMessage("That QR is not an Android wireless-debugging code.")
+                    }
+                },
+                onClose = { scanning = false },
+            )
         }
     }
 
@@ -85,7 +120,7 @@ fun WirelessTab(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         ThisDeviceCard(network, self, selfPairing)
-        PairingCard(ui, viewModel, pairingEndpoint = selfPairing?.endpoint)
+        PairingCard(ui, viewModel, pairingEndpoint = selfPairing?.endpoint, onScan = ::requestScan)
         NetworkDevicesCard(others, scanning = ui.scanning)
     }
 }
@@ -126,6 +161,7 @@ private fun PairingCard(
     ui: WirelessUiState,
     viewModel: WirelessViewModel,
     pairingEndpoint: String?,
+    onScan: () -> Unit,
 ) {
     val context = LocalContext.current
     Card {
@@ -183,15 +219,21 @@ private fun PairingCard(
 
                 else -> {
                     Text(
-                        "Show a QR code and a pairing code so a computer can pair with this device over Wi-Fi.",
+                        "Pair a computer over Wi-Fi. Show a code to type into `adb pair`, or scan the QR " +
+                            "that Android Studio shows.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                    Button(enabled = !ui.pairingBusy, onClick = { viewModel.startPairing() }) {
-                        if (ui.pairingBusy) {
-                            CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
-                        } else {
-                            Text("Start pairing")
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Button(enabled = !ui.pairingBusy, onClick = { viewModel.startPairing() }) {
+                            if (ui.pairingBusy) {
+                                CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                            } else {
+                                Text("Pair with code")
+                            }
+                        }
+                        OutlinedButton(enabled = !ui.pairingBusy, onClick = onScan) {
+                            Text("Scan Studio QR")
                         }
                     }
                 }
@@ -218,35 +260,33 @@ private fun PairingCard(
 
 @Composable
 private fun PairingActive(session: PairingSession, endpoint: String?, onStop: () -> Unit) {
-    val qr = remember(session.qrContent) { QrImage.encode(session.qrContent) }
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        if (qr != null) {
-            Image(
-                bitmap = qr,
-                contentDescription = "Pairing QR code",
-                filterQuality = FilterQuality.None,
-                modifier = Modifier
-                    .size(220.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(Color.White)
-                    .padding(10.dp),
+        if (session.scanned) {
+            Text(
+                "Scanned Android Studio's code. Finishing the pairing on this device.",
+                style = MaterialTheme.typography.bodyMedium,
             )
+        } else {
+            Text(
+                "On the computer run this and enter the code. In Android Studio, use Pair using pairing " +
+                    "code, choose this device, and enter it.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                "adb pair ${endpoint ?: "<pairing port appears here>"}",
+                style = MaterialTheme.typography.bodyLarge,
+                fontFamily = FontFamily.Monospace,
+            )
+            InfoRow("Pairing code", session.code)
         }
-        Text(
-            "In Android Studio, choose Pair using QR code and scan this. Or on a computer run:",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Text(
-            "adb pair ${endpoint ?: "<pairing port appears here>"}",
-            style = MaterialTheme.typography.bodyMedium,
-            fontFamily = FontFamily.Monospace,
-        )
-        InfoRow("Pairing code", session.code)
         Row(verticalAlignment = Alignment.CenterVertically) {
             CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
             Spacer(Modifier.size(12.dp))
-            Text("Waiting for a computer to pair…", style = MaterialTheme.typography.bodyMedium)
+            Text(
+                if (session.scanned) "Waiting for Android Studio…" else "Waiting for a computer to pair…",
+                style = MaterialTheme.typography.bodyMedium,
+            )
         }
         TextButton(onClick = onStop) { Text("Stop") }
     }

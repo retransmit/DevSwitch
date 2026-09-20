@@ -120,10 +120,13 @@ A second tab mirrors what Android's own Wireless debugging screen shows.
 - **This device** reads the phone's own IPv4 addresses, across every interface so the Wi-Fi
   address is still found when a VPN owns the default route, and shows the live wireless debugging
   address and pairing port as adb announces them over mDNS.
-- **Pair a computer** shows a QR code and a six-digit pairing code so a computer can pair over
-  Wi-Fi, either by scanning in Android Studio or by running `adb pair <host:port>` and typing the
-  code. Both use the same one call: the app generates the code, hands it to the framework as the
-  pairing secret, and renders the `WIFI:T:ADB;S:<guid>;P:<code>;;` QR that Studio expects.
+- **Pair a computer** works two ways. *Pair with code* shows an `adb pair <host:port>` command and
+  a six-digit code: run it on the computer, or in Android Studio use Pair using pairing code, pick
+  the device and type the code. *Scan Studio QR* opens the camera to read the QR that Android
+  Studio's Pair using QR code shows; the phone then advertises under the name carried in that QR, so
+  Studio connects and finishes. Both drive the same framework call, with the code the app generates
+  or the values it scanned. The phone never displays a QR, because Android Studio shows the QR and
+  the phone is the side that scans it.
 - **Paired computers** lists the computers already paired, with an Unpair action.
 - **On this network** is a live mDNS scan of adb endpoints on the Wi-Fi, this device included.
 

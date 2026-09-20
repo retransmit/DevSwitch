@@ -28,6 +28,8 @@ data class PairingSession(
     val code: String,
     val serviceName: String,
     val qrContent: String,
+    /** True when the phone joined a pairing Android Studio started, by scanning its QR. */
+    val scanned: Boolean = false,
 )
 
 data class WirelessUiState(
@@ -145,6 +147,42 @@ class WirelessViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     /**
+     * Pairs from a QR that Android Studio shows. Studio picks the service name and password and
+     * waits for a device with that name; the phone advertises under it, so Studio connects and
+     * completes the pairing. Same one call as the code flow, with the scanned values.
+     */
+    fun pairWithScannedQr(serviceName: String, password: String) {
+        val state = _ui.value
+        if (state.pairingBusy || state.pairing != null || !state.pairingAvailable) return
+        viewModelScope.launch {
+            _ui.update { it.copy(pairingBusy = true, pairingMessage = null) }
+            val result = runCatching {
+                runCatching { settings.set(DevSetting.WIRELESS_DEBUGGING, true) }
+                shizuku.withService { it.enablePairing(serviceName, password) }
+            }
+            result.onSuccess {
+                val baseline = _ui.value.pairedDevices.map { it.fingerprint }.toSet()
+                _ui.update {
+                    it.copy(
+                        pairing = PairingSession(password, serviceName, "", scanned = true),
+                        pairingBusy = false,
+                    )
+                }
+                pollForPairing(baseline)
+            }.onFailure { error ->
+                val cause = generateSequence(error) { it.cause }.last()
+                android.util.Log.e("DevSwitch", "scanned pairing failed", error)
+                _ui.update {
+                    it.copy(
+                        pairingBusy = false,
+                        pairingMessage = "Could not pair: ${cause.javaClass.simpleName}: ${cause.message ?: "no detail"}",
+                    )
+                }
+            }
+        }
+    }
+
+    /**
      * Broadcasts can't reach the app, so a completed pairing is detected by a new fingerprint
      * appearing. It gives up after a few minutes so it never polls, or holds a pairing open, forever.
      */
@@ -185,6 +223,8 @@ class WirelessViewModel(app: Application) : AndroidViewModel(app) {
             loadPairedDevices()
         }
     }
+
+    fun reportPairingMessage(message: String) = _ui.update { it.copy(pairingMessage = message) }
 
     fun clearPairingMessage() = _ui.update { it.copy(pairingMessage = null) }
 
