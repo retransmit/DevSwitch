@@ -11,6 +11,11 @@
         android:name="android.permission.WRITE_SECURE_SETTINGS"
         tools:ignore="ProtectedPermissions" />
 
+    <!-- Reading the device's own IP via ConnectivityManager, and mDNS discovery of adb
+         endpoints on the local network. No location permission is used. -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <!-- Package visibility (Android 11+): lets the app tell "Shizuku not installed" from "not running". -->
     <queries>
         <package android:name="moe.shizuku.privileged.api" />

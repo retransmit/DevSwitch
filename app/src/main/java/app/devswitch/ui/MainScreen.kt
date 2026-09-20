@@ -27,12 +27,17 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -49,14 +54,19 @@ import app.devswitch.DevSetting
 import app.devswitch.MainViewModel
 import app.devswitch.R
 import app.devswitch.UiState
+import app.devswitch.WirelessViewModel
 import app.devswitch.shizuku.ShizukuBridge
 import app.devswitch.shizuku.ShizukuStatus
 import kotlinx.coroutines.delay
 
 @Composable
-fun MainScreen(viewModel: MainViewModel = viewModel()) {
+fun MainScreen(
+    viewModel: MainViewModel = viewModel(),
+    wirelessViewModel: WirelessViewModel = viewModel(),
+) {
     val ui by viewModel.ui.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
+    var tab by rememberSaveable { mutableIntStateOf(0) }
 
     // Coming back from a terminal, Shizuku or a root prompt is when the permission state changes.
     LifecycleResumeEffect(Unit) {
@@ -82,45 +92,66 @@ fun MainScreen(viewModel: MainViewModel = viewModel()) {
         viewModel.clearMessage()
     }
 
+    val tabs = listOf(stringResource(R.string.tab_switches), stringResource(R.string.tab_wireless))
     Scaffold(
-        topBar = { TopAppBar(title = { Text(stringResource(R.string.app_name)) }) },
+        topBar = {
+            Column {
+                TopAppBar(title = { Text(stringResource(R.string.app_name)) })
+                TabRow(selectedTabIndex = tab) {
+                    tabs.forEachIndexed { index, title ->
+                        Tab(
+                            selected = tab == index,
+                            onClick = { tab = index },
+                            text = { Text(title) },
+                        )
+                    }
+                }
+            }
+        },
         snackbarHost = { SnackbarHost(snackbar) },
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            if (ui.hasPermission) ReadyCard() else SetupCard(ui, viewModel)
-
-            ToggleCard(
-                title = stringResource(R.string.developer_options),
-                subtitle = stringResource(R.string.developer_options_hint),
-                checked = ui.state.developerOptions,
-                enabled = ui.hasPermission,
-                onCheckedChange = { viewModel.toggle(DevSetting.DEVELOPER_OPTIONS, it) },
-            )
-            ToggleCard(
-                title = stringResource(R.string.usb_debugging),
-                subtitle = stringResource(R.string.usb_debugging_hint),
-                checked = ui.state.usbDebugging,
-                enabled = ui.hasPermission,
-                onCheckedChange = { viewModel.toggle(DevSetting.USB_DEBUGGING, it) },
-            )
-            val wirelessSupported = DevSetting.WIRELESS_DEBUGGING.supported
-            ToggleCard(
-                title = stringResource(R.string.wireless_debugging),
-                subtitle = stringResource(
-                    if (wirelessSupported) R.string.wireless_debugging_hint else R.string.wireless_debugging_unsupported,
-                ),
-                checked = ui.state.wirelessDebugging,
-                enabled = ui.hasPermission && wirelessSupported,
-                onCheckedChange = { viewModel.toggle(DevSetting.WIRELESS_DEBUGGING, it) },
-            )
+        when (tab) {
+            0 -> SwitchesTab(ui, viewModel, Modifier.padding(padding))
+            else -> WirelessTab(wirelessViewModel, Modifier.padding(padding))
         }
+    }
+}
+
+@Composable
+private fun SwitchesTab(ui: UiState, viewModel: MainViewModel, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        if (ui.hasPermission) ReadyCard() else SetupCard(ui, viewModel)
+
+        ToggleCard(
+            title = stringResource(R.string.developer_options),
+            subtitle = stringResource(R.string.developer_options_hint),
+            checked = ui.state.developerOptions,
+            enabled = ui.hasPermission,
+            onCheckedChange = { viewModel.toggle(DevSetting.DEVELOPER_OPTIONS, it) },
+        )
+        ToggleCard(
+            title = stringResource(R.string.usb_debugging),
+            subtitle = stringResource(R.string.usb_debugging_hint),
+            checked = ui.state.usbDebugging,
+            enabled = ui.hasPermission,
+            onCheckedChange = { viewModel.toggle(DevSetting.USB_DEBUGGING, it) },
+        )
+        val wirelessSupported = DevSetting.WIRELESS_DEBUGGING.supported
+        ToggleCard(
+            title = stringResource(R.string.wireless_debugging),
+            subtitle = stringResource(
+                if (wirelessSupported) R.string.wireless_debugging_hint else R.string.wireless_debugging_unsupported,
+            ),
+            checked = ui.state.wirelessDebugging,
+            enabled = ui.hasPermission && wirelessSupported,
+            onCheckedChange = { viewModel.toggle(DevSetting.WIRELESS_DEBUGGING, it) },
+        )
     }
 }
 

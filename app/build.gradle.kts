@@ -56,6 +56,9 @@ dependencies {
     implementation("androidx.compose.material3:material3:1.4.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0")
 
+    // QR image for the in-app wireless pairing flow.
+    implementation("com.google.zxing:core:3.5.4")
+
     // Lets the app grant itself WRITE_SECURE_SETTINGS on-device (no computer) when Shizuku runs.
     implementation("dev.rikka.shizuku:api:13.1.5")
     implementation("dev.rikka.shizuku:provider:13.1.5")

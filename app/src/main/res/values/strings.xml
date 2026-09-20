@@ -2,6 +2,9 @@
 <resources>
     <string name="app_name">DevSwitch</string>
 
+    <string name="tab_switches">Switches</string>
+    <string name="tab_wireless">Wireless</string>
+
     <string name="developer_options">Developer options</string>
     <string name="developer_options_hint">Shows or hides the Developer options screen in Settings. Turning it off also turns off both debugging switches, as Settings does.</string>
     <string name="usb_debugging">USB debugging</string>
