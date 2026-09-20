@@ -1,4 +1,4 @@
-<p align="center"><img src="art/icon-512.png" width="128" alt="DevSwitch icon"></p>
+<p align="center"><img src="art/icon-rounded.png" width="128" alt="DevSwitch icon"></p>
 
 # DevSwitch
 
@@ -115,7 +115,8 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 
 The launcher icon is an adaptive icon built from vector drawables in `app/src/main/res`, with a
 monochrome layer for themed icons on Android 13 and later. `art/icon.svg` is the master and
-`art/icon-512.png` is the full-bleed artwork for a store listing.
+`art/icon-512.png` is the full-bleed square a store listing needs (Google Play rounds it itself), and
+`art/icon-rounded.png` is the same artwork with rounded corners for pages like this one.
 
 The dome and antennae adapt the Android robot head. The Android robot is reproduced or modified
 from work created and shared by Google and used according to terms described in the Creative
