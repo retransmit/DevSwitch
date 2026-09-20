@@ -1,3 +1,5 @@
+<p align="center"><img src="art/icon-512.png" width="128" alt="DevSwitch icon"></p>
+
 # DevSwitch
 
 A small Android app that switches **Developer options**, **USB debugging** and
@@ -108,6 +110,16 @@ Native Kotlin + Jetpack Compose, single module.
 ./gradlew assembleRelease        # minified with R8; unsigned until a signing config is added
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
+
+## Icon
+
+The launcher icon is an adaptive icon built from vector drawables in `app/src/main/res`, with a
+monochrome layer for themed icons on Android 13 and later. `art/icon.svg` is the master and
+`art/icon-512.png` is the full-bleed artwork for a store listing.
+
+The dome and antennae adapt the Android robot head. The Android robot is reproduced or modified
+from work created and shared by Google and used according to terms described in the Creative
+Commons 3.0 Attribution License.
 
 ## Layout
 
