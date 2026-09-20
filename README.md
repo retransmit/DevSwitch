@@ -190,3 +190,13 @@ app/src/main/
     ├── tiles/ToggleTileService.kt      Quick Settings tiles
     └── ui/                             Compose screens (Switches and Wireless tabs) and theme
 ```
+
+## License
+
+DevSwitch is free software under the GNU General Public License, version 3 or later
+(SPDX-License-Identifier: `GPL-3.0-or-later`). See [LICENSE](LICENSE) for the full text.
+
+The launcher icon adapts the Android robot, which Google licenses under the Creative Commons
+Attribution 3.0 license; that attribution is in the Icon section above and is separate from this
+project's license. The bundled dependencies (Jetpack Compose, CameraX, ZXing, Shizuku,
+HiddenApiBypass) are under the Apache License 2.0.

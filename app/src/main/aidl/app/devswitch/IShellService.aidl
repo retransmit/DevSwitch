@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Lennox
+
 package app.devswitch;
 
 // Implemented by ShellService, which Shizuku runs with the shell uid and shell SELinux context.
