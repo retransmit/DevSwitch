@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.crazyapp.devtoggle.ui.DevToggleTheme
+import com.crazyapp.devtoggle.ui.DevSwitchTheme
 import com.crazyapp.devtoggle.ui.MainScreen
 
 class MainActivity : ComponentActivity() {
@@ -12,7 +12,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            DevToggleTheme {
+            DevSwitchTheme {
                 MainScreen()
             }
         }

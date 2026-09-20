@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Dev Toggle</string>
+    <string name="app_name">DevSwitch</string>
 
     <string name="developer_options">Developer options</string>
     <string name="developer_options_hint">Shows or hides the Developer options screen in Settings. Turning it off also turns off both debugging switches, as Settings does.</string>

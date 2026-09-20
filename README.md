@@ -1,4 +1,4 @@
-# Dev Toggle
+# DevSwitch
 
 A small Android app that switches **Developer options**, **USB debugging** and
 **Wireless debugging** on and off, from a screen with three switches and from three

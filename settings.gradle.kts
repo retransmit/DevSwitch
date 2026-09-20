@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "DevToggle"
+rootProject.name = "DevSwitch"
 include(":app")
