@@ -130,11 +130,12 @@ A second tab mirrors what Android's own Wireless debugging screen shows.
 ### Why pairing needs Shizuku
 
 Generating the pairing code drives the framework's hidden `android.debug.IAdbManager`, whose calls
-require the `MANAGE_DEBUGGING` permission. Only the shell and system identities hold it, so the app
-routes those calls through Shizuku (the shell uid), the same channel it already uses to grant its
-own permission. The proxy is built by reflecting on the device's own `IAdbManager$Stub`, so the
-binder transaction codes always match the running platform even though the API changed shape at
-Android 13.
+require the `MANAGE_DEBUGGING` permission that only the shell and system identities hold. The app's
+own process cannot even look up the adb service, because its SELinux context is denied that, so the
+whole interaction runs inside a Shizuku user service: a process Shizuku spawns with the shell
+identity and SELinux context. There it looks up the adb service and reflects on the device's own
+`IAdbManager$Stub`, so the binder transaction codes always match the running platform even though
+the API changed shape at Android 13.
 
 The framework reports a completed pairing through a broadcast that also requires MANAGE_DEBUGGING to
 *receive*, which the app's own process does not hold, so the app cannot listen for it. Instead it
@@ -146,9 +147,10 @@ no privilege and work regardless.
 
 ### Known caveats
 
-- The pairing path could not be exercised on the test phone, which has neither Shizuku nor root. The
-  reflection is written against AOSP for Android 11 through 16 and degrades to a clear message on
-  failure rather than crashing.
+- Pairing was verified end to end through Shizuku on an Android 16 (iQOO / Vivo OriginOS) phone: the
+  app generated the QR and code, the phone advertised the pairing service, and `adb pair` against the
+  shown endpoint and code succeeded. The reflection is written against AOSP for Android 11 through 16
+  and degrades to a clear message on failure rather than crashing.
 - Heavily modified ROMs (Xiaomi HyperOS, Vivo/iQOO OriginOS and Funtouch, ColorOS) can gate or limit
   wireless debugging and may restrict mDNS. The API shape itself is inherited from AOSP, so the calls
   are expected to work where wireless debugging itself does.
@@ -177,10 +179,10 @@ app/src/main/
     ├── MainActivity.kt
     ├── privilege/RootGrant.kt          `su -c pm grant ...`
     ├── shizuku/ShizukuBridge.kt        Shizuku status, permission, user-service call
-    ├── shizuku/ShellService.kt         runs in Shizuku's shell-uid process
+    ├── shizuku/ShellService.kt         shell-uid process: runs commands and the IAdbManager pairing calls
     ├── wireless/DeviceDiscovery.kt     mDNS scan for adb endpoints
     ├── wireless/WirelessInfo.kt        this device's IPv4 addresses
-    ├── wireless/AdbManagerReflect.kt   pairing via the hidden IAdbManager over Shizuku
+    ├── wireless/PairedDevice.kt        a paired computer, decoded from the shell service
     ├── wireless/QrImage.kt             QR bitmap for the pairing code
     ├── tiles/ToggleTileService.kt      Quick Settings tiles
     └── ui/                             Compose screens (Switches and Wireless tabs) and theme

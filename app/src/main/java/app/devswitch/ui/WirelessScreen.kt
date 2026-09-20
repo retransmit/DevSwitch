@@ -41,6 +41,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.devswitch.PairingSession
 import app.devswitch.WirelessUiState
 import app.devswitch.WirelessViewModel
+import app.devswitch.shizuku.ShizukuBridge
+import app.devswitch.shizuku.ShizukuStatus
 import app.devswitch.wireless.AdbServiceType
 import app.devswitch.wireless.DiscoveredService
 import app.devswitch.wireless.NetworkStatus
@@ -131,24 +133,50 @@ private fun PairingCard(
             Text("Pair a computer", style = MaterialTheme.typography.titleMedium)
 
             when {
-                !ui.pairingAvailable -> {
-                    Text(
-                        "Generating a pairing code needs the shell identity, which DevSwitch gets through " +
-                            "Shizuku, the same way it grants its own permission. Set up Shizuku on the " +
-                            "Switches tab, or pair from Android's own screen.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    OutlinedButton(
-                        onClick = {
-                            runCatching {
-                                context.startActivity(
-                                    Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
-                                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-                                )
+                !ui.pairingAvailable -> when (ui.shizukuStatus) {
+                    ShizukuStatus.PermissionNeeded -> {
+                        Text(
+                            "Shizuku is running. Allow DevSwitch to use it, then pairing and the paired-computers list work here.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Button(onClick = { viewModel.requestShizukuPermission() }) {
+                            Text("Grant Shizuku access")
+                        }
+                    }
+
+                    ShizukuStatus.NotRunning -> {
+                        Text(
+                            "Shizuku is installed but not started. Start it, then reopen this tab.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Button(onClick = {
+                                runCatching {
+                                    context.packageManager
+                                        .getLaunchIntentForPackage(ShizukuBridge.SHIZUKU_PACKAGE)
+                                        ?.let { context.startActivity(it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
+                                }
+                            }) { Text("Open Shizuku") }
+                            OutlinedButton(onClick = { openDeveloperOptions(context) }) {
+                                Text("Android settings")
                             }
-                        },
-                    ) { Text("Open Developer options") }
+                        }
+                    }
+
+                    else -> {
+                        Text(
+                            "Generating a pairing code needs the shell identity, which DevSwitch gets through " +
+                                "Shizuku, the same way it grants its own permission. Set up Shizuku on the " +
+                                "Switches tab, or pair from Android's own screen.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        OutlinedButton(onClick = { openDeveloperOptions(context) }) {
+                            Text("Open Developer options")
+                        }
+                    }
                 }
 
                 ui.pairing != null -> PairingActive(ui.pairing!!, pairingEndpoint) { viewModel.stopPairing() }
@@ -285,5 +313,14 @@ private fun InfoRow(label: String, value: String) {
             modifier = Modifier.weight(1f),
         )
         Text(value, style = MaterialTheme.typography.bodyMedium, fontFamily = FontFamily.Monospace)
+    }
+}
+
+private fun openDeveloperOptions(context: android.content.Context) {
+    runCatching {
+        context.startActivity(
+            Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+        )
     }
 }

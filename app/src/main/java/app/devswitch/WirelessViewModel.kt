@@ -5,13 +5,11 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import app.devswitch.shizuku.ShizukuBridge
 import app.devswitch.shizuku.ShizukuStatus
-import app.devswitch.wireless.AdbManagerReflect
 import app.devswitch.wireless.DeviceDiscovery
 import app.devswitch.wireless.DiscoveredService
 import app.devswitch.wireless.NetworkStatus
 import app.devswitch.wireless.PairedDevice
 import app.devswitch.wireless.WirelessInfo
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,8 +17,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import rikka.shizuku.Shizuku
 import kotlin.random.Random
+
+// ~3 minutes at a 2s interval, longer than a person needs to scan and confirm.
+private const val PAIRING_POLL_ATTEMPTS = 90
 
 /** An active pairing offer: a QR to scan and the same code to type into `adb pair`. */
 data class PairingSession(
@@ -33,6 +34,7 @@ data class WirelessUiState(
     val network: NetworkStatus? = null,
     val devices: List<DiscoveredService> = emptyList(),
     val scanning: Boolean = false,
+    val shizukuStatus: ShizukuStatus = ShizukuStatus.NotInstalled,
     val pairingAvailable: Boolean = false,
     val pairing: PairingSession? = null,
     val pairedDevices: List<PairedDevice> = emptyList(),
@@ -52,6 +54,15 @@ class WirelessViewModel(app: Application) : AndroidViewModel(app) {
 
     private var discoveryJob: Job? = null
     private var pairingPollJob: Job? = null
+
+    // Shizuku can start, or be authorized, while this tab is open; refresh when either happens.
+    private val binderListener = Shizuku.OnBinderReceivedListener { refreshPairing() }
+    private val permissionListener = Shizuku.OnRequestPermissionResultListener { _, _ -> refreshPairing() }
+
+    init {
+        Shizuku.addBinderReceivedListenerSticky(binderListener)
+        Shizuku.addRequestPermissionResultListener(permissionListener)
+    }
 
     fun refreshNetwork() = _ui.update { it.copy(network = info.current()) }
 
@@ -76,16 +87,20 @@ class WirelessViewModel(app: Application) : AndroidViewModel(app) {
 
     /** Pairing needs the shell identity; it is offered only when Shizuku is ready. */
     fun refreshPairing() {
-        val available = shizuku.status() == ShizukuStatus.Ready
-        _ui.update { it.copy(pairingAvailable = available) }
-        if (available) loadPairedDevices()
+        val status = shizuku.status()
+        _ui.update { it.copy(shizukuStatus = status, pairingAvailable = status == ShizukuStatus.Ready) }
+        if (status == ShizukuStatus.Ready) loadPairedDevices()
+    }
+
+    fun requestShizukuPermission() {
+        runCatching { shizuku.requestPermission() }
     }
 
     private fun loadPairedDevices() {
         viewModelScope.launch {
-            val devices = withContext(Dispatchers.IO) {
-                runCatching { AdbManagerReflect.pairedDevices() }.getOrDefault(emptyList())
-            }
+            val devices = runCatching {
+                shizuku.withService { service -> service.pairedDevices().map(PairedDevice::parse) }
+            }.getOrDefault(emptyList())
             _ui.update { it.copy(pairedDevices = devices) }
         }
     }
@@ -96,13 +111,13 @@ class WirelessViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch {
             _ui.update { it.copy(pairingBusy = true, pairingMessage = null) }
             val code = "%06d".format(Random.nextInt(0, 1_000_000))
-            val result = withContext(Dispatchers.IO) {
-                runCatching {
-                    // The pairing server only runs while wireless debugging is on. Enable it first;
-                    // the app can, since it holds WRITE_SECURE_SETTINGS.
-                    runCatching { settings.set(DevSetting.WIRELESS_DEBUGGING, true) }
-                    val name = AdbManagerReflect.deviceGuid() ?: "DevSwitch-%08x".format(Random.nextInt())
-                    AdbManagerReflect.enablePairing(name, code)
+            val result = runCatching {
+                // The pairing server only runs while wireless debugging is on. Enable it first; the
+                // app can, since it holds WRITE_SECURE_SETTINGS.
+                runCatching { settings.set(DevSetting.WIRELESS_DEBUGGING, true) }
+                shizuku.withService { service ->
+                    val name = service.deviceGuid().ifBlank { "DevSwitch-%08x".format(Random.nextInt()) }
+                    service.enablePairing(name, code)
                     name
                 }
             }
@@ -116,30 +131,41 @@ class WirelessViewModel(app: Application) : AndroidViewModel(app) {
                 }
                 pollForPairing(baseline)
             }.onFailure { error ->
+                val cause = generateSequence(error) { it.cause }.last()
+                android.util.Log.e("DevSwitch", "pairing failed", error)
                 _ui.update {
-                    it.copy(pairingBusy = false, pairingMessage = "Could not start pairing: ${error.message}")
+                    it.copy(
+                        pairingBusy = false,
+                        pairingMessage = "Could not start pairing: " +
+                            "${cause.javaClass.simpleName}: ${cause.message ?: "no detail"}",
+                    )
                 }
             }
         }
     }
 
-    /** Broadcasts can't reach the app, so success is detected by a new device appearing. */
+    /**
+     * Broadcasts can't reach the app, so a completed pairing is detected by a new fingerprint
+     * appearing. It gives up after a few minutes so it never polls, or holds a pairing open, forever.
+     */
     private fun pollForPairing(baseline: Set<String>) {
         pairingPollJob?.cancel()
         pairingPollJob = viewModelScope.launch {
-            while (true) {
+            repeat(PAIRING_POLL_ATTEMPTS) {
                 delay(2_000)
-                val devices = withContext(Dispatchers.IO) {
-                    runCatching { AdbManagerReflect.pairedDevices() }.getOrDefault(emptyList())
-                }
+                val devices = runCatching {
+                    shizuku.withService { service -> service.pairedDevices().map(PairedDevice::parse) }
+                }.getOrDefault(emptyList())
                 _ui.update { it.copy(pairedDevices = devices) }
                 val fresh = devices.firstOrNull { it.fingerprint !in baseline }
                 if (fresh != null) {
-                    withContext(Dispatchers.IO) { runCatching { AdbManagerReflect.disablePairing() } }
+                    runCatching { shizuku.withService { it.disablePairing() } }
                     _ui.update { it.copy(pairing = null, pairingMessage = "Paired with ${fresh.label}") }
-                    break
+                    return@launch
                 }
             }
+            runCatching { shizuku.withService { it.disablePairing() } }
+            _ui.update { it.copy(pairing = null, pairingMessage = "Pairing timed out. Start again to retry.") }
         }
     }
 
@@ -148,17 +174,22 @@ class WirelessViewModel(app: Application) : AndroidViewModel(app) {
         pairingPollJob = null
         if (_ui.value.pairing == null) return
         viewModelScope.launch {
-            withContext(Dispatchers.IO) { runCatching { AdbManagerReflect.disablePairing() } }
+            runCatching { shizuku.withService { it.disablePairing() } }
             _ui.update { it.copy(pairing = null) }
         }
     }
 
     fun unpair(device: PairedDevice) {
         viewModelScope.launch {
-            withContext(Dispatchers.IO) { runCatching { AdbManagerReflect.unpair(device.fingerprint) } }
+            runCatching { shizuku.withService { it.unpairDevice(device.fingerprint) } }
             loadPairedDevices()
         }
     }
 
     fun clearPairingMessage() = _ui.update { it.copy(pairingMessage = null) }
+
+    override fun onCleared() {
+        Shizuku.removeBinderReceivedListener(binderListener)
+        Shizuku.removeRequestPermissionResultListener(permissionListener)
+    }
 }

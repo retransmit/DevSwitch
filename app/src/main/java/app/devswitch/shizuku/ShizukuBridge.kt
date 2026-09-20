@@ -47,13 +47,19 @@ class ShizukuBridge(context: Context) {
         Shizuku.requestPermission(REQUEST_CODE)
     }
 
-    /** Runs [command] with the shell uid through a Shizuku user service and returns its output. */
-    suspend fun runAsShell(command: List<String>): String = withTimeout(30_000) {
-        val args = Shizuku.UserServiceArgs(ComponentName(appContext, ShellService::class.java))
+    private val userServiceArgs by lazy {
+        Shizuku.UserServiceArgs(ComponentName(appContext, ShellService::class.java))
             .daemon(false)
             .processNameSuffix("shell")
             .debuggable(BuildConfig.DEBUG)
             .version(BuildConfig.VERSION_CODE)
+    }
+
+    /**
+     * Binds the shell-uid user service, runs [block] on it off the main thread, and unbinds. The
+     * pairing methods must go through here because only this process can reach the adb service.
+     */
+    suspend fun <T> withService(block: (IShellService) -> T): T = withTimeout(30_000) {
         var connection: ServiceConnection? = null
         try {
             val service = suspendCancellableCoroutine<IShellService> { continuation ->
@@ -72,14 +78,18 @@ class ShizukuBridge(context: Context) {
                     override fun onServiceDisconnected(name: ComponentName?) = Unit
                 }
                 connection = conn
-                Shizuku.bindUserService(args, conn)
+                Shizuku.bindUserService(userServiceArgs, conn)
             }
-            withContext(Dispatchers.IO) { service.execute(command.toTypedArray()) }
+            withContext(Dispatchers.IO) { block(service) }
         } finally {
             // remove = true also stops the service process; nothing lingers with shell rights.
-            connection?.let { Shizuku.unbindUserService(args, it, true) }
+            connection?.let { Shizuku.unbindUserService(userServiceArgs, it, true) }
         }
     }
+
+    /** Runs [command] with the shell uid through the user service and returns its output. */
+    suspend fun runAsShell(command: List<String>): String =
+        withService { it.execute(command.toTypedArray()) }
 
     companion object {
         const val SHIZUKU_PACKAGE = "moe.shizuku.privileged.api"
