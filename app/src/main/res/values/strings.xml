@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Dev Toggle</string>
+
+    <string name="developer_options">Developer options</string>
+    <string name="developer_options_hint">Shows or hides the Developer options screen in Settings. Turning it off also turns off both debugging switches, as Settings does.</string>
+    <string name="usb_debugging">USB debugging</string>
+    <string name="usb_debugging_hint">Lets a computer connected over USB use ADB. A new computer still has to be authorized on this phone.</string>
+    <string name="wireless_debugging">Wireless debugging</string>
+    <string name="wireless_debugging_hint">ADB over Wi-Fi (pairing still required). Needs an active Wi-Fi connection; Android switches it back off when Wi-Fi drops.</string>
+    <string name="wireless_debugging_unsupported">Needs Android 11 or newer.</string>
+
+    <string name="ready_title">Ready</string>
+    <string name="ready_body">WRITE_SECURE_SETTINGS is granted. The switches below apply immediately, and three Quick Settings tiles are available in the tile editor.</string>
+
+    <string name="setup_title">One-time setup needed</string>
+    <string name="setup_body">Android only lets an app change these settings if it holds WRITE_SECURE_SETTINGS, which cannot be requested with a dialog. Grant it once with any option below. It survives reboots and app updates.</string>
+    <string name="setup_adb_step">From a computer with ADB (USB debugging has to be on for this one step):</string>
+    <string name="copy_command">Copy command</string>
+    <string name="setup_shizuku_step">Or on this phone, without a computer:</string>
+    <string name="shizuku_get">Get Shizuku</string>
+    <string name="shizuku_start">Start Shizuku</string>
+    <string name="shizuku_allow">Allow Shizuku access</string>
+    <string name="shizuku_grant">Grant with Shizuku</string>
+    <string name="root_grant">Grant with root</string>
+
+    <string name="tile_developer_options">Developer options</string>
+    <string name="tile_usb_debugging">USB debugging</string>
+    <string name="tile_wireless_debugging">Wireless debugging</string>
+    <string name="tile_on">On</string>
+    <string name="tile_off">Off</string>
+    <string name="tile_needs_setup">Tap to set up</string>
+    <string name="tile_unsupported">Not available</string>
+</resources>
