@@ -1,12 +1,12 @@
-package com.crazyapp.devtoggle.shizuku
+package app.devswitch.shizuku
 
 import android.content.ComponentName
 import android.content.Context
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.IBinder
-import com.crazyapp.devtoggle.BuildConfig
-import com.crazyapp.devtoggle.IShellService
+import app.devswitch.BuildConfig
+import app.devswitch.IShellService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext

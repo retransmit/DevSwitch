@@ -1,4 +1,4 @@
-package com.crazyapp.devtoggle
+package app.devswitch
 
 import android.Manifest
 import android.content.Context

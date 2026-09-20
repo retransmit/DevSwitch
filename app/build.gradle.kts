@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.crazyapp.devtoggle"
+    namespace = "app.devswitch"
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.crazyapp.devtoggle"
+        applicationId = "app.devswitch"
         minSdk = 26
         targetSdk = 36
         versionCode = 1

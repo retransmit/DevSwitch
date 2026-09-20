@@ -1,4 +1,4 @@
-package com.crazyapp.devtoggle.privilege
+package app.devswitch.privilege
 
 object RootGrant {
     /**

@@ -1,4 +1,4 @@
-package com.crazyapp.devtoggle;
+package app.devswitch;
 
 // Implemented by ShellService, which Shizuku runs with the shell uid.
 interface IShellService {

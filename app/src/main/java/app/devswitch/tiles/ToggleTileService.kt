@@ -1,4 +1,4 @@
-package com.crazyapp.devtoggle.tiles
+package app.devswitch.tiles
 
 import android.app.PendingIntent
 import android.content.Intent
@@ -9,10 +9,10 @@ import android.os.Looper
 import android.provider.Settings
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
-import com.crazyapp.devtoggle.DevSetting
-import com.crazyapp.devtoggle.DevSettings
-import com.crazyapp.devtoggle.MainActivity
-import com.crazyapp.devtoggle.R
+import app.devswitch.DevSetting
+import app.devswitch.DevSettings
+import app.devswitch.MainActivity
+import app.devswitch.R
 
 /** One Quick Settings tile per setting; the concrete subclasses only pick the setting. */
 abstract class ToggleTileService(private val setting: DevSetting) : TileService() {

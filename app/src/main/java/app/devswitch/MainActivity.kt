@@ -1,11 +1,11 @@
-package com.crazyapp.devtoggle
+package app.devswitch
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.crazyapp.devtoggle.ui.DevSwitchTheme
-import com.crazyapp.devtoggle.ui.MainScreen
+import app.devswitch.ui.DevSwitchTheme
+import app.devswitch.ui.MainScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

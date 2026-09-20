@@ -1,8 +1,8 @@
-package com.crazyapp.devtoggle.shizuku
+package app.devswitch.shizuku
 
 import android.content.Context
 import androidx.annotation.Keep
-import com.crazyapp.devtoggle.IShellService
+import app.devswitch.IShellService
 import kotlin.system.exitProcess
 
 /**

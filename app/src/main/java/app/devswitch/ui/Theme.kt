@@ -1,4 +1,4 @@
-package com.crazyapp.devtoggle.ui
+package app.devswitch.ui
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme

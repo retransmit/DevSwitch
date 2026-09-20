@@ -1,4 +1,4 @@
-package com.crazyapp.devtoggle.ui
+package app.devswitch.ui
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -45,12 +45,12 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.crazyapp.devtoggle.DevSetting
-import com.crazyapp.devtoggle.MainViewModel
-import com.crazyapp.devtoggle.R
-import com.crazyapp.devtoggle.UiState
-import com.crazyapp.devtoggle.shizuku.ShizukuBridge
-import com.crazyapp.devtoggle.shizuku.ShizukuStatus
+import app.devswitch.DevSetting
+import app.devswitch.MainViewModel
+import app.devswitch.R
+import app.devswitch.UiState
+import app.devswitch.shizuku.ShizukuBridge
+import app.devswitch.shizuku.ShizukuStatus
 import kotlinx.coroutines.delay
 
 @Composable

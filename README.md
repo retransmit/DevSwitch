@@ -37,7 +37,7 @@ Developer options screen.
    **a. From a computer with ADB** (USB debugging must be on for this one step):
 
    ```sh
-   adb shell pm grant com.crazyapp.devtoggle android.permission.WRITE_SECURE_SETTINGS
+   adb shell pm grant app.devswitch android.permission.WRITE_SECURE_SETTINGS
    ```
 
    The setup card has a "Copy command" button.
@@ -115,7 +115,7 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 app/src/main/
 ├── AndroidManifest.xml                 permission, Shizuku provider, three tile services
 ├── aidl/.../IShellService.aidl         interface of the Shizuku user service
-└── java/com/crazyapp/devtoggle/
+└── java/app/devswitch/
     ├── DevSettings.kt                  read / write / observe the three settings
     ├── MainViewModel.kt                UI state, toggling, the three grant paths
     ├── MainActivity.kt

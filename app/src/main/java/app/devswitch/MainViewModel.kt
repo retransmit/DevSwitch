@@ -1,11 +1,11 @@
-package com.crazyapp.devtoggle
+package app.devswitch
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.crazyapp.devtoggle.privilege.RootGrant
-import com.crazyapp.devtoggle.shizuku.ShizukuBridge
-import com.crazyapp.devtoggle.shizuku.ShizukuStatus
+import app.devswitch.privilege.RootGrant
+import app.devswitch.shizuku.ShizukuBridge
+import app.devswitch.shizuku.ShizukuStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
