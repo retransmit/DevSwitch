@@ -70,7 +70,9 @@ Developer options screen.
   the RSA fingerprint prompt, and wireless debugging still needs pairing.
 - The tiles refuse to toggle on a locked screen and ask for unlock first, so a debugging
   channel cannot be opened from the lock screen.
-- The app has no network permission and no other permissions.
+- Beyond WRITE_SECURE_SETTINGS, the app declares ACCESS_NETWORK_STATE and INTERNET, used only by
+  the Wireless tab to read this device's IP and to discover adb endpoints on the local network
+  over mDNS. No location permission is requested, so no Wi-Fi network name is read.
 
 ## Tested
 
@@ -111,6 +113,46 @@ Native Kotlin + Jetpack Compose, single module.
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
 
+## Wireless tab
+
+A second tab mirrors what Android's own Wireless debugging screen shows.
+
+- **This device** reads the phone's own IPv4 addresses, across every interface so the Wi-Fi
+  address is still found when a VPN owns the default route, and shows the live wireless debugging
+  address and pairing port as adb announces them over mDNS.
+- **Pair a computer** shows a QR code and a six-digit pairing code so a computer can pair over
+  Wi-Fi, either by scanning in Android Studio or by running `adb pair <host:port>` and typing the
+  code. Both use the same one call: the app generates the code, hands it to the framework as the
+  pairing secret, and renders the `WIFI:T:ADB;S:<guid>;P:<code>;;` QR that Studio expects.
+- **Paired computers** lists the computers already paired, with an Unpair action.
+- **On this network** is a live mDNS scan of adb endpoints on the Wi-Fi, this device included.
+
+### Why pairing needs Shizuku
+
+Generating the pairing code drives the framework's hidden `android.debug.IAdbManager`, whose calls
+require the `MANAGE_DEBUGGING` permission. Only the shell and system identities hold it, so the app
+routes those calls through Shizuku (the shell uid), the same channel it already uses to grant its
+own permission. The proxy is built by reflecting on the device's own `IAdbManager$Stub`, so the
+binder transaction codes always match the running platform even though the API changed shape at
+Android 13.
+
+The framework reports a completed pairing through a broadcast that also requires MANAGE_DEBUGGING to
+*receive*, which the app's own process does not hold, so the app cannot listen for it. Instead it
+polls `getPairedDevices()` and notices a new entry.
+
+When Shizuku is not running, the Pair card explains this and offers a button that opens Android's own
+Developer options, where pairing works without the app. Device discovery and the address readouts need
+no privilege and work regardless.
+
+### Known caveats
+
+- The pairing path could not be exercised on the test phone, which has neither Shizuku nor root. The
+  reflection is written against AOSP for Android 11 through 16 and degrades to a clear message on
+  failure rather than crashing.
+- Heavily modified ROMs (Xiaomi HyperOS, Vivo/iQOO OriginOS and Funtouch, ColorOS) can gate or limit
+  wireless debugging and may restrict mDNS. The API shape itself is inherited from AOSP, so the calls
+  are expected to work where wireless debugging itself does.
+
 ## Icon
 
 The launcher icon is an adaptive icon built from vector drawables in `app/src/main/res`, with a
@@ -130,11 +172,16 @@ app/src/main/
 ├── aidl/.../IShellService.aidl         interface of the Shizuku user service
 └── java/app/devswitch/
     ├── DevSettings.kt                  read / write / observe the three settings
-    ├── MainViewModel.kt                UI state, toggling, the three grant paths
+    ├── MainViewModel.kt                switches UI state, toggling, the three grant paths
+    ├── WirelessViewModel.kt            discovery, this device's address, pairing
     ├── MainActivity.kt
     ├── privilege/RootGrant.kt          `su -c pm grant ...`
     ├── shizuku/ShizukuBridge.kt        Shizuku status, permission, user-service call
     ├── shizuku/ShellService.kt         runs in Shizuku's shell-uid process
+    ├── wireless/DeviceDiscovery.kt     mDNS scan for adb endpoints
+    ├── wireless/WirelessInfo.kt        this device's IPv4 addresses
+    ├── wireless/AdbManagerReflect.kt   pairing via the hidden IAdbManager over Shizuku
+    ├── wireless/QrImage.kt             QR bitmap for the pairing code
     ├── tiles/ToggleTileService.kt      Quick Settings tiles
-    └── ui/                             Compose screen and theme
+    └── ui/                             Compose screens (Switches and Wireless tabs) and theme
 ```

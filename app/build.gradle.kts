@@ -62,4 +62,7 @@ dependencies {
     // Lets the app grant itself WRITE_SECURE_SETTINGS on-device (no computer) when Shizuku runs.
     implementation("dev.rikka.shizuku:api:13.1.5")
     implementation("dev.rikka.shizuku:provider:13.1.5")
+
+    // Reflect on the framework's hidden IAdbManager to drive wireless pairing through Shizuku.
+    implementation("org.lsposed.hiddenapibypass:hiddenapibypass:6.1")
 }
