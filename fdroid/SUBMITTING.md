@@ -10,8 +10,8 @@ release. `app.devswitch.yml` next to this file is the entry for F-Droid's `fdroi
             -alias devswitch -keyalg RSA -keysize 4096 -validity 10000
 
 Copy `keystore.properties.example` to `keystore.properties`, fill it in, and back the keystore up.
-It is gitignored. Reusing the Atrium key is fine too; then `AllowedAPKSigningKeys` is the same value
-as in that entry.
+It is gitignored. DevSwitch has its own key, created 2026-09-21; its certificate digest is already
+filled into `app.devswitch.yml`.
 
 ## Each release
 

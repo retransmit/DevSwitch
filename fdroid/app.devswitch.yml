@@ -21,7 +21,7 @@ Builds:
       - yes
     binary: https://github.com/retransmit/DevSwitch/releases/download/v%v/DevSwitch-%v.apk
 
-AllowedAPKSigningKeys: REPLACE_WITH_THE_SHA256_OF_YOUR_RELEASE_SIGNING_CERTIFICATE
+AllowedAPKSigningKeys: 16152867f6117a20ab8c4f3b4096842b95ba29c051cdef99e4fec3d12e218445
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
