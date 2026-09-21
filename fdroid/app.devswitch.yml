@@ -1,0 +1,29 @@
+Categories:
+  - Development
+  - System
+License: GPL-3.0-or-later
+AuthorName: retransmit
+SourceCode: https://github.com/retransmit/DevSwitch
+IssueTracker: https://github.com/retransmit/DevSwitch/issues
+Changelog: https://github.com/retransmit/DevSwitch/releases
+
+AutoName: DevSwitch
+
+RepoType: git
+Repo: https://github.com/retransmit/DevSwitch.git
+
+Builds:
+  - versionName: '1.0'
+    versionCode: 1
+    commit: v1.0
+    subdir: app
+    gradle:
+      - yes
+    binary: https://github.com/retransmit/DevSwitch/releases/download/v%v/DevSwitch-%v.apk
+
+AllowedAPKSigningKeys: REPLACE_WITH_THE_SHA256_OF_YOUR_RELEASE_SIGNING_CERTIFICATE
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: '1.0'
+CurrentVersionCode: 1

@@ -9,3 +9,8 @@
 /captures/
 .externalNativeBuild/
 .cxx/
+
+# Release signing material never goes in the repository.
+/keystore.properties
+*.jks
+*.keystore

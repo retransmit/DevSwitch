@@ -1,0 +1,5 @@
+Initial release.
+- Developer options, USB debugging and Wireless debugging switches, with Quick Settings tiles
+- One-time permission grant through adb, Shizuku or root
+- Wireless tab: this device's adb address, network device discovery, and pairing by code or by scanning Android Studio's QR (needs Shizuku)
+- Confirmations before turning anything off or unpairing

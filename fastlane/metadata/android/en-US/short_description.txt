@@ -1,0 +1,1 @@
+Toggle developer options, USB and wireless debugging, with Quick Settings tiles

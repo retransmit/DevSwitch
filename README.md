@@ -201,6 +201,19 @@ Unit tests for the pure pieces, the QR parser, paired-device decoding and the ad
 under `app/src/test/java/app/devswitch/wireless/`. The device-only parts (Shizuku, the hidden
 adb service, mDNS, the camera) are verified on a phone rather than in unit tests.
 
+## Releasing and F-Droid
+
+The build is set up the way F-Droid's reproducible-build check needs it: the release APK is signed
+only when a gitignored `keystore.properties` is present (see `keystore.properties.example`) and is
+left unsigned otherwise, never signed with the debug key, and Google Play's encrypted dependency blob
+is left out of every artifact.
+
+To cut a release, build with a JDK 17 or 21 (what F-Droid's build server uses) with
+`./gradlew clean assembleRelease`, tag the commit `vX.Y` and push the tag, then create a GitHub
+release for it and attach the APK as `DevSwitch-X.Y.apk`. The listing text, changelog, icon and
+screenshots F-Droid shows live in `fastlane/metadata/android/en-US/`. A ready-to-submit
+`fdroiddata` entry and the step-by-step submission are in [`fdroid/`](fdroid/).
+
 ## License
 
 DevSwitch is free software under the GNU General Public License, version 3 or later
