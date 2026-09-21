@@ -3,6 +3,7 @@
 
 package app.devswitch.ui
 
+import android.os.SystemClock
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
@@ -19,14 +20,21 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import app.devswitch.R
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.BinaryBitmap
 import com.google.zxing.DecodeHintType
@@ -34,6 +42,7 @@ import com.google.zxing.MultiFormatReader
 import com.google.zxing.NotFoundException
 import com.google.zxing.PlanarYUVLuminanceSource
 import com.google.zxing.common.HybridBinarizer
+import kotlinx.coroutines.delay
 import java.util.concurrent.Executors
 
 /** Parses an ADB pairing QR "WIFI:T:ADB;S:<name>;P:<password>;;" into (serviceName, password). */
@@ -53,12 +62,20 @@ fun parseAdbPairingQr(text: String): Pair<String, String>? {
     return service to password
 }
 
-/** Decodes the Y (luminance) plane of each camera frame, stopping at the first QR it reads. */
-private class QrAnalyzer(private val onQr: (String) -> Unit) : ImageAnalysis.Analyzer {
+/**
+ * Decodes the Y (luminance) plane of each frame. Only an Android pairing QR ends the scan; any
+ * other code raises a throttled "wrong QR" signal and scanning continues, so pointing at a random
+ * code by mistake does not close the scanner.
+ */
+private class QrAnalyzer(
+    private val onPairingQr: (serviceName: String, password: String) -> Unit,
+    private val onOtherQr: () -> Unit,
+) : ImageAnalysis.Analyzer {
     private val reader = MultiFormatReader().apply {
         setHints(mapOf(DecodeHintType.POSSIBLE_FORMATS to listOf(BarcodeFormat.QR_CODE)))
     }
     private var handled = false
+    private var lastOtherAt = 0L
 
     override fun analyze(image: ImageProxy) {
         if (handled) {
@@ -71,9 +88,18 @@ private class QrAnalyzer(private val onQr: (String) -> Unit) : ImageAnalysis.Ana
             val source = PlanarYUVLuminanceSource(
                 data, plane.rowStride, image.height, 0, 0, image.width, image.height, false,
             )
-            val result = reader.decodeWithState(BinaryBitmap(HybridBinarizer(source)))
-            handled = true
-            onQr(result.text)
+            val text = reader.decodeWithState(BinaryBitmap(HybridBinarizer(source))).text
+            val parsed = parseAdbPairingQr(text)
+            if (parsed != null) {
+                handled = true
+                onPairingQr(parsed.first, parsed.second)
+            } else {
+                val now = SystemClock.elapsedRealtime()
+                if (now - lastOtherAt > OTHER_QR_THROTTLE_MS) {
+                    lastOtherAt = now
+                    onOtherQr()
+                }
+            }
         } catch (_: NotFoundException) {
             // No QR in this frame; keep scanning.
         } catch (_: Exception) {
@@ -83,15 +109,28 @@ private class QrAnalyzer(private val onQr: (String) -> Unit) : ImageAnalysis.Ana
             image.close()
         }
     }
+
+    private companion object {
+        const val OTHER_QR_THROTTLE_MS = 1_500L
+    }
 }
 
-/** Full-screen camera scanner. Calls [onResult] once with the first QR's text, then the caller closes it. */
+/** Full-screen camera scanner. Calls [onResult] once with the pairing QR's contents; the caller closes it. */
 @Composable
-fun QrScannerOverlay(onResult: (String) -> Unit, onClose: () -> Unit) {
+fun QrScannerOverlay(onResult: (serviceName: String, password: String) -> Unit, onClose: () -> Unit) {
+    val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val executor = remember { Executors.newSingleThreadExecutor() }
+    val mainExecutor = remember { ContextCompat.getMainExecutor(context) }
+    var wrongQr by remember { mutableStateOf(false) }
     DisposableEffect(Unit) { onDispose { executor.shutdown() } }
     KeepScreenOn(true)
+    LaunchedEffect(wrongQr) {
+        if (wrongQr) {
+            delay(2_000)
+            wrongQr = false
+        }
+    }
 
     Surface(color = Color.Black, modifier = Modifier.fillMaxSize()) {
         Box(Modifier.fillMaxSize()) {
@@ -105,10 +144,15 @@ fun QrScannerOverlay(onResult: (String) -> Unit, onClose: () -> Unit) {
                         val preview = Preview.Builder().build().also {
                             it.setSurfaceProvider(previewView.surfaceProvider)
                         }
+                        // Analyzer callbacks arrive on the analysis thread; hand them to the main thread.
+                        val analyzer = QrAnalyzer(
+                            onPairingQr = { name, password -> mainExecutor.execute { onResult(name, password) } },
+                            onOtherQr = { mainExecutor.execute { wrongQr = true } },
+                        )
                         val analysis = ImageAnalysis.Builder()
                             .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                             .build()
-                            .also { it.setAnalyzer(executor, QrAnalyzer(onResult)) }
+                            .also { it.setAnalyzer(executor, analyzer) }
                         runCatching {
                             provider.unbindAll()
                             provider.bindToLifecycle(
@@ -118,7 +162,7 @@ fun QrScannerOverlay(onResult: (String) -> Unit, onClose: () -> Unit) {
                                 analysis,
                             )
                         }
-                    }, ContextCompat.getMainExecutor(previewView.context))
+                    }, mainExecutor)
                     previewView
                 },
             )
@@ -130,18 +174,33 @@ fun QrScannerOverlay(onResult: (String) -> Unit, onClose: () -> Unit) {
                     .padding(16.dp),
             ) {
                 Text(
-                    "In Android Studio, open Pair using QR code, then point the camera at it.",
+                    stringResource(R.string.scanner_instruction),
                     color = Color.White,
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(14.dp),
                 )
+            }
+            if (wrongQr) {
+                Surface(
+                    color = Color(0xCC7F1D1D),
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(24.dp),
+                ) {
+                    Text(
+                        stringResource(R.string.scanner_wrong_qr),
+                        color = Color.White,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(14.dp),
+                    )
+                }
             }
             Button(
                 onClick = onClose,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(24.dp),
-            ) { Text("Cancel") }
+            ) { Text(stringResource(R.string.cancel)) }
         }
     }
 }

@@ -39,13 +39,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.devswitch.PairingNote
 import app.devswitch.PairingSession
+import app.devswitch.R
 import app.devswitch.WirelessUiState
 import app.devswitch.WirelessViewModel
 import app.devswitch.shizuku.ShizukuBridge
@@ -81,7 +84,7 @@ fun WirelessTab(
     val cameraPermission = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) { granted ->
-        if (granted) scanning = true else viewModel.reportPairingMessage("Camera permission is needed to scan the QR.")
+        if (granted) scanning = true else viewModel.reportPairingMessage(R.string.msg_camera_permission)
     }
     fun requestScan() {
         val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
@@ -95,14 +98,9 @@ fun WirelessTab(
             properties = DialogProperties(usePlatformDefaultWidth = false),
         ) {
             QrScannerOverlay(
-                onResult = { text ->
+                onResult = { name, password ->
                     scanning = false
-                    val parsed = parseAdbPairingQr(text)
-                    if (parsed != null) {
-                        viewModel.pairWithScannedQr(parsed.first, parsed.second)
-                    } else {
-                        viewModel.reportPairingMessage("That QR is not an Android wireless-debugging code.")
-                    }
+                    viewModel.pairWithScannedQr(name, password)
                 },
                 onClose = { scanning = false },
             )
@@ -141,26 +139,27 @@ private fun ThisDeviceCard(
 ) {
     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text("This device", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.wireless_this_device), style = MaterialTheme.typography.titleMedium)
             if (network?.connected != true) {
-                Text(
-                    "Not connected to Wi-Fi. Wireless debugging needs a network.",
-                    style = MaterialTheme.typography.bodyMedium,
-                )
+                Text(stringResource(R.string.wireless_no_wifi), style = MaterialTheme.typography.bodyMedium)
             } else {
-                InfoRow("IP address", network.primaryIpv4 ?: "unknown")
                 val ip = network.primaryIpv4
+                InfoRow(stringResource(R.string.wireless_ip), ip ?: stringResource(R.string.wireless_unknown))
                 when {
-                    connect != null -> InfoRow("Wireless debugging", "${connect.host}:${connect.port}")
+                    connect != null ->
+                        InfoRow(stringResource(R.string.wireless_debugging), "${connect.host}:${connect.port}")
                     // The framework's own port answers before mDNS resolves, when Shizuku can ask it.
-                    fallbackPort > 0 && ip != null -> InfoRow("Wireless debugging", "$ip:$fallbackPort")
+                    fallbackPort > 0 && ip != null ->
+                        InfoRow(stringResource(R.string.wireless_debugging), "$ip:$fallbackPort")
                     else -> Text(
-                        "Wireless debugging is off, or its address has not been announced yet. Turn it on from the Switches tab.",
+                        stringResource(R.string.wireless_off_hint),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                if (pairing != null) InfoRow("Pairing port", "${pairing.host}:${pairing.port}")
+                if (pairing != null) {
+                    InfoRow(stringResource(R.string.wireless_pairing_port), "${pairing.host}:${pairing.port}")
+                }
             }
         }
     }
@@ -177,24 +176,24 @@ private fun PairingCard(
     var pendingUnpair by remember { mutableStateOf<PairedDevice?>(null) }
     Card {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text("Pair a computer", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.pair_title), style = MaterialTheme.typography.titleMedium)
 
             when {
                 !ui.pairingAvailable -> when (ui.shizukuStatus) {
                     ShizukuStatus.PermissionNeeded -> {
                         Text(
-                            "Shizuku is running. Allow DevSwitch to use it, then pairing and the paired-computers list work here.",
+                            stringResource(R.string.pair_shizuku_permission),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                         Button(onClick = { viewModel.requestShizukuPermission() }) {
-                            Text("Grant Shizuku access")
+                            Text(stringResource(R.string.pair_grant_shizuku))
                         }
                     }
 
                     ShizukuStatus.NotRunning -> {
                         Text(
-                            "Shizuku is installed but not started. Start it, then reopen this tab.",
+                            stringResource(R.string.pair_shizuku_not_running),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -205,23 +204,21 @@ private fun PairingCard(
                                         .getLaunchIntentForPackage(ShizukuBridge.SHIZUKU_PACKAGE)
                                         ?.let { context.startActivity(it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
                                 }
-                            }) { Text("Open Shizuku") }
+                            }) { Text(stringResource(R.string.pair_open_shizuku)) }
                             OutlinedButton(onClick = { openDeveloperOptions(context) }) {
-                                Text("Android settings")
+                                Text(stringResource(R.string.pair_android_settings))
                             }
                         }
                     }
 
                     else -> {
                         Text(
-                            "Generating a pairing code needs the shell identity, which DevSwitch gets through " +
-                                "Shizuku, the same way it grants its own permission. Set up Shizuku on the " +
-                                "Switches tab, or pair from Android's own screen.",
+                            stringResource(R.string.pair_needs_shizuku),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                         OutlinedButton(onClick = { openDeveloperOptions(context) }) {
-                            Text("Open Developer options")
+                            Text(stringResource(R.string.pair_open_dev_options))
                         }
                     }
                 }
@@ -230,8 +227,7 @@ private fun PairingCard(
 
                 else -> {
                     Text(
-                        "Pair a computer over Wi-Fi. Show a code to type into `adb pair`, or scan the QR " +
-                            "that Android Studio shows.",
+                        stringResource(R.string.pair_intro),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -240,19 +236,19 @@ private fun PairingCard(
                             if (ui.pairingBusy) {
                                 CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
                             } else {
-                                Text("Pair with code")
+                                Text(stringResource(R.string.pair_with_code))
                             }
                         }
                         OutlinedButton(enabled = !ui.pairingBusy, onClick = onScan) {
-                            Text("Scan Studio QR")
+                            Text(stringResource(R.string.pair_scan_studio_qr))
                         }
                     }
                 }
             }
 
-            ui.pairingMessage?.let { message ->
+            ui.pairingMessage?.let { note ->
                 Text(
-                    message,
+                    noteText(note),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary,
                 )
@@ -260,7 +256,7 @@ private fun PairingCard(
 
             if (ui.pairedDevices.isNotEmpty()) {
                 HorizontalDivider()
-                Text("Paired computers", style = MaterialTheme.typography.labelLarge)
+                Text(stringResource(R.string.pair_paired_computers), style = MaterialTheme.typography.labelLarge)
                 ui.pairedDevices.forEach { device ->
                     PairedDeviceRow(device) { pendingUnpair = device }
                 }
@@ -271,49 +267,52 @@ private fun PairingCard(
     pendingUnpair?.let { device ->
         AlertDialog(
             onDismissRequest = { pendingUnpair = null },
-            title = { Text("Unpair ${device.label}?") },
-            text = {
-                Text("If this is the computer you are connected through, that connection drops and it will have to pair again.")
-            },
+            title = { Text(stringResource(R.string.pair_unpair_title, device.label)) },
+            text = { Text(stringResource(R.string.pair_unpair_body)) },
             confirmButton = {
-                TextButton(onClick = { viewModel.unpair(device); pendingUnpair = null }) { Text("Unpair") }
+                TextButton(onClick = { viewModel.unpair(device); pendingUnpair = null }) {
+                    Text(stringResource(R.string.pair_unpair))
+                }
             },
-            dismissButton = { TextButton(onClick = { pendingUnpair = null }) { Text("Cancel") } },
+            dismissButton = {
+                TextButton(onClick = { pendingUnpair = null }) { Text(stringResource(R.string.cancel)) }
+            },
         )
     }
 }
+
+/** Resolves a view-model message, which carries a resource id so the wording lives in resources. */
+@Composable
+private fun noteText(note: PairingNote): String =
+    if (note.arg != null) stringResource(note.id, note.arg) else stringResource(note.id)
 
 @Composable
 private fun PairingActive(session: PairingSession, endpoint: String?, onStop: () -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         if (session.scanned) {
-            Text(
-                "Scanned Android Studio's code. Finishing the pairing on this device.",
-                style = MaterialTheme.typography.bodyMedium,
-            )
+            Text(stringResource(R.string.pair_scanned_finishing), style = MaterialTheme.typography.bodyMedium)
         } else {
             Text(
-                "On the computer run this and enter the code. In Android Studio, use Pair using pairing " +
-                    "code, choose this device, and enter it.",
+                stringResource(R.string.pair_code_instructions),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
-                "adb pair ${endpoint ?: "<pairing port appears here>"}",
+                stringResource(R.string.pair_adb_pair_cmd, endpoint ?: stringResource(R.string.pair_port_placeholder)),
                 style = MaterialTheme.typography.bodyLarge,
                 fontFamily = FontFamily.Monospace,
             )
-            InfoRow("Pairing code", session.code)
+            InfoRow(stringResource(R.string.pair_code_label), session.code)
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
             CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
             Spacer(Modifier.size(12.dp))
             Text(
-                if (session.scanned) "Waiting for Android Studio…" else "Waiting for a computer to pair…",
+                stringResource(if (session.scanned) R.string.pair_waiting_studio else R.string.pair_waiting_computer),
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
-        TextButton(onClick = onStop) { Text("Stop") }
+        TextButton(onClick = onStop) { Text(stringResource(R.string.pair_stop)) }
     }
 }
 
@@ -323,12 +322,12 @@ private fun PairedDeviceRow(device: PairedDevice, onUnpair: () -> Unit) {
         Column(Modifier.weight(1f)) {
             Text(device.label, style = MaterialTheme.typography.bodyLarge)
             Text(
-                if (device.connected) "Connected" else "Paired",
+                stringResource(if (device.connected) R.string.pair_state_connected else R.string.pair_state_paired),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        TextButton(onClick = onUnpair) { Text("Unpair") }
+        TextButton(onClick = onUnpair) { Text(stringResource(R.string.pair_unpair)) }
     }
 }
 
@@ -338,7 +337,7 @@ private fun NetworkDevicesCard(devices: List<DiscoveredService>, scanning: Boole
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    "On this network",
+                    stringResource(R.string.network_title),
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.weight(1f),
                 )
@@ -346,7 +345,7 @@ private fun NetworkDevicesCard(devices: List<DiscoveredService>, scanning: Boole
             }
             if (devices.isEmpty()) {
                 Text(
-                    "No other adb devices found. Devices show up here while their wireless debugging is on and they are on this Wi-Fi.",
+                    stringResource(R.string.network_none),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -355,8 +354,10 @@ private fun NetworkDevicesCard(devices: List<DiscoveredService>, scanning: Boole
                     if (index > 0) HorizontalDivider()
                     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                         Text(device.name, style = MaterialTheme.typography.bodyLarge)
+                        val label = stringResource(device.service.labelRes)
+                        val endpoint = device.endpoint ?: stringResource(R.string.network_resolving)
                         Text(
-                            "${device.service.label}  •  ${device.endpoint ?: "resolving…"}",
+                            "$label  •  $endpoint",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontFamily = FontFamily.Monospace,

@@ -5,6 +5,7 @@ package app.devswitch
 
 import android.app.Application
 import android.util.Log
+import androidx.annotation.StringRes
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import app.devswitch.shizuku.ShizukuBridge
@@ -42,6 +43,9 @@ data class PairingSession(
     val scanned: Boolean = false,
 )
 
+/** A message for the screen, carried as a resource id so it can be translated there. */
+data class PairingNote(@StringRes val id: Int, val arg: String? = null)
+
 data class WirelessUiState(
     val network: NetworkStatus? = null,
     val devices: List<DiscoveredService> = emptyList(),
@@ -51,7 +55,7 @@ data class WirelessUiState(
     val pairing: PairingSession? = null,
     val pairedDevices: List<PairedDevice> = emptyList(),
     val pairingBusy: Boolean = false,
-    val pairingMessage: String? = null,
+    val pairingMessage: PairingNote? = null,
     /** The connect port as the framework reports it; 0 when unknown or off. Fills in before mDNS does. */
     val wirelessPort: Int = 0,
 )
@@ -220,23 +224,23 @@ class WirelessViewModel(app: Application) : AndroidViewModel(app) {
                     withContext(Dispatchers.IO) { handle.service.pairedDevices().map(PairedDevice::parse) }
                 }.getOrNull()
                 if (devices == null) {
-                    endPairing("Lost contact with Shizuku, so pairing stopped.")
+                    endPairing(PairingNote(R.string.msg_lost_shizuku))
                     return@launch
                 }
                 _ui.update { it.copy(pairedDevices = devices) }
                 val fresh = devices.firstOrNull { it.fingerprint !in baseline }
                 if (fresh != null) {
-                    endPairing("Paired with ${fresh.label}")
+                    endPairing(PairingNote(R.string.msg_paired_with, fresh.label))
                     return@launch
                 }
                 if (selfPairingAdvertised()) {
                     advertised = true
                 } else if (advertised) {
-                    endPairing("Pairing finished.")
+                    endPairing(PairingNote(R.string.msg_pairing_finished))
                     return@launch
                 }
             }
-            endPairing("Pairing timed out. Start again to retry.")
+            endPairing(PairingNote(R.string.msg_pairing_timeout))
         }
     }
 
@@ -247,7 +251,7 @@ class WirelessViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     /** Closes the pairing offer and releases the bound service. */
-    private suspend fun endPairing(message: String?) {
+    private suspend fun endPairing(message: PairingNote?) {
         val handle = pairingHandle
         pairingHandle = null
         if (handle != null) {
@@ -272,21 +276,21 @@ class WirelessViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun reportPairingMessage(message: String) = _ui.update { it.copy(pairingMessage = message) }
+    fun reportPairingMessage(@StringRes id: Int) = _ui.update { it.copy(pairingMessage = PairingNote(id)) }
 
     fun clearPairingMessage() = _ui.update { it.copy(pairingMessage = null) }
 
     /** The full cause goes to the log; the screen gets a plain sentence with the likely reason. */
-    private fun friendlyPairingError(error: Throwable): String {
+    private fun friendlyPairingError(error: Throwable): PairingNote {
         val text = generateSequence(error) { it.cause }.joinToString(" ") { it.message.orEmpty() }
-        val reason = when {
-            error is TimeoutCancellationException -> "Shizuku took too long to respond."
-            "did not respond" in text -> "Shizuku's service did not respond. Is Shizuku still running?"
-            "unavailable" in text -> "The adb service is not reachable on this device."
-            "SecurityException" in text -> "Not permitted. Check that Shizuku access is still allowed."
-            else -> "See the log for details."
+        val id = when {
+            error is TimeoutCancellationException -> R.string.pair_error_timeout
+            "did not respond" in text -> R.string.pair_error_no_response
+            "unavailable" in text -> R.string.pair_error_unavailable
+            "SecurityException" in text -> R.string.pair_error_not_permitted
+            else -> R.string.pair_error_generic
         }
-        return "Could not start pairing. $reason"
+        return PairingNote(id)
     }
 
     override fun onCleared() {

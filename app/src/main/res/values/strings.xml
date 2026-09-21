@@ -41,4 +41,61 @@
     <string name="confirm_off_wireless">A computer connected over Wi-Fi will be disconnected. If that is the connection you are using right now, it drops too.</string>
     <string name="confirm_turn_off">Turn off</string>
     <string name="cancel">Cancel</string>
+
+    <!-- Wireless tab: this device -->
+    <string name="wireless_this_device">This device</string>
+    <string name="wireless_no_wifi">Not connected to Wi-Fi. Wireless debugging needs a network.</string>
+    <string name="wireless_ip">IP address</string>
+    <string name="wireless_unknown">unknown</string>
+    <string name="wireless_off_hint">Wireless debugging is off, or its address has not been announced yet. Turn it on from the Switches tab.</string>
+    <string name="wireless_pairing_port">Pairing port</string>
+    <string name="service_pairing">Pairing</string>
+
+    <!-- Wireless tab: pairing card -->
+    <string name="pair_title">Pair a computer</string>
+    <string name="pair_shizuku_permission">Shizuku is running. Allow DevSwitch to use it, then pairing and the paired-computers list work here.</string>
+    <string name="pair_grant_shizuku">Grant Shizuku access</string>
+    <string name="pair_shizuku_not_running">Shizuku is installed but not started. Start it, then reopen this tab.</string>
+    <string name="pair_open_shizuku">Open Shizuku</string>
+    <string name="pair_android_settings">Android settings</string>
+    <string name="pair_needs_shizuku">Generating a pairing code needs the shell identity, which DevSwitch gets through Shizuku, the same way it grants its own permission. Set up Shizuku on the Switches tab, or pair from Android\'s own screen.</string>
+    <string name="pair_open_dev_options">Open Developer options</string>
+    <string name="pair_intro">Pair a computer over Wi-Fi. Show a code to type into adb pair, or scan the QR that Android Studio shows.</string>
+    <string name="pair_with_code">Pair with code</string>
+    <string name="pair_scan_studio_qr">Scan Studio QR</string>
+    <string name="pair_paired_computers">Paired computers</string>
+    <string name="pair_unpair">Unpair</string>
+    <string name="pair_unpair_title">Unpair %1$s?</string>
+    <string name="pair_unpair_body">If this is the computer you are connected through, that connection drops and it will have to pair again.</string>
+    <string name="pair_scanned_finishing">Scanned Android Studio\'s code. Finishing the pairing on this device.</string>
+    <string name="pair_code_instructions">On the computer run this and enter the code. In Android Studio, use Pair using pairing code, choose this device, and enter it.</string>
+    <string name="pair_adb_pair_cmd">adb pair %1$s</string>
+    <string name="pair_port_placeholder">&lt;pairing port appears here&gt;</string>
+    <string name="pair_code_label">Pairing code</string>
+    <string name="pair_waiting_studio">Waiting for Android Studio…</string>
+    <string name="pair_waiting_computer">Waiting for a computer to pair…</string>
+    <string name="pair_stop">Stop</string>
+    <string name="pair_state_connected">Connected</string>
+    <string name="pair_state_paired">Paired</string>
+
+    <!-- Wireless tab: network list -->
+    <string name="network_title">On this network</string>
+    <string name="network_none">No other adb devices found. Devices show up here while their wireless debugging is on and they are on this Wi-Fi.</string>
+    <string name="network_resolving">resolving…</string>
+
+    <!-- QR scanner -->
+    <string name="scanner_instruction">In Android Studio, open Pair using QR code, then point the camera at it.</string>
+    <string name="scanner_wrong_qr">That is not an Android pairing QR. Keep looking for the one Android Studio shows.</string>
+
+    <!-- Pairing messages, resolved on screen from the view model -->
+    <string name="msg_camera_permission">Camera permission is needed to scan the QR.</string>
+    <string name="msg_lost_shizuku">Lost contact with Shizuku, so pairing stopped.</string>
+    <string name="msg_paired_with">Paired with %1$s</string>
+    <string name="msg_pairing_finished">Pairing finished.</string>
+    <string name="msg_pairing_timeout">Pairing timed out. Start again to retry.</string>
+    <string name="pair_error_timeout">Could not start pairing. Shizuku took too long to respond.</string>
+    <string name="pair_error_no_response">Could not start pairing. Shizuku\'s service did not respond. Is Shizuku still running?</string>
+    <string name="pair_error_unavailable">Could not start pairing. The adb service is not reachable on this device.</string>
+    <string name="pair_error_not_permitted">Could not start pairing. Not permitted. Check that Shizuku access is still allowed.</string>
+    <string name="pair_error_generic">Could not start pairing. See the log for details.</string>
 </resources>

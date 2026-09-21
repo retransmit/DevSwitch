@@ -6,6 +6,8 @@ package app.devswitch.wireless
 import android.content.Context
 import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
+import androidx.annotation.StringRes
+import app.devswitch.R
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -13,9 +15,9 @@ import java.net.Inet4Address
 import java.net.InetAddress
 
 /** The two mDNS service types adbd advertises when wireless debugging is active. */
-enum class AdbServiceType(val type: String, val label: String) {
-    CONNECT("_adb-tls-connect._tcp", "Wireless debugging"),
-    PAIRING("_adb-tls-pairing._tcp", "Pairing"),
+enum class AdbServiceType(val type: String, @StringRes val labelRes: Int) {
+    CONNECT("_adb-tls-connect._tcp", R.string.wireless_debugging),
+    PAIRING("_adb-tls-pairing._tcp", R.string.service_pairing),
 }
 
 /** One adb endpoint seen on the local network, this device's own included. */
