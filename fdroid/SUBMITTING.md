@@ -28,7 +28,7 @@ filled into `app.devswitch.yml`.
 
 4. Tag the release commit and push the tag: `git tag v1.0 && git push origin v1.0`.
 5. Create the GitHub release for that tag and attach the APK renamed to `DevSwitch-1.0.apk`, which
-   is the name the `binary:` line expects. Renaming does not change the file, so the comparison
+   is the name the `Binaries:` line expects. Renaming does not change the file, so the comparison
    still matches.
 
 ## The merge request
