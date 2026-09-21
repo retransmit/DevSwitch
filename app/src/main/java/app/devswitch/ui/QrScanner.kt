@@ -35,6 +35,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import app.devswitch.R
+import app.devswitch.wireless.parseAdbPairingQr
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.BinaryBitmap
 import com.google.zxing.DecodeHintType
@@ -44,23 +45,6 @@ import com.google.zxing.PlanarYUVLuminanceSource
 import com.google.zxing.common.HybridBinarizer
 import kotlinx.coroutines.delay
 import java.util.concurrent.Executors
-
-/** Parses an ADB pairing QR "WIFI:T:ADB;S:<name>;P:<password>;;" into (serviceName, password). */
-fun parseAdbPairingQr(text: String): Pair<String, String>? {
-    if (!text.startsWith("WIFI:")) return null
-    var type: String? = null
-    var service: String? = null
-    var password: String? = null
-    for (field in text.removePrefix("WIFI:").split(";")) {
-        when {
-            field.startsWith("T:") -> type = field.removePrefix("T:")
-            field.startsWith("S:") -> service = field.removePrefix("S:")
-            field.startsWith("P:") -> password = field.removePrefix("P:")
-        }
-    }
-    if (type != "ADB" || service.isNullOrBlank() || password.isNullOrBlank()) return null
-    return service to password
-}
 
 /**
  * Decodes the Y (luminance) plane of each frame. Only an Android pairing QR ends the scan; any

@@ -71,4 +71,6 @@ dependencies {
 
     // Reflect on the framework's hidden IAdbManager to drive wireless pairing through Shizuku.
     implementation("org.lsposed.hiddenapibypass:hiddenapibypass:6.1")
+
+    testImplementation("junit:junit:4.13.2")
 }

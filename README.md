@@ -116,6 +116,7 @@ Native Kotlin + Jetpack Compose, single module.
 ./gradlew assembleDebug          # app/build/outputs/apk/debug/app-debug.apk
 ./gradlew assembleRelease        # minified with R8; unsigned until a signing config is added
 adb install -r app/build/outputs/apk/debug/app-debug.apk
+./gradlew testDebugUnitTest      # unit tests for the QR parser, paired-device decoding, address logic
 ```
 
 ## Wireless tab
@@ -189,11 +190,16 @@ app/src/main/
     ├── shizuku/ShellService.kt         shell-uid process: runs commands and the IAdbManager pairing calls
     ├── wireless/DeviceDiscovery.kt     mDNS scan for adb endpoints
     ├── wireless/WirelessInfo.kt        this device's IPv4 addresses
+    ├── wireless/AdbPairingQr.kt        parses the WIFI:T:ADB pairing QR
     ├── wireless/PairedDevice.kt        a paired computer, decoded from the shell service
     ├── wireless/QrImage.kt             QR bitmap for the pairing code
     ├── tiles/ToggleTileService.kt      Quick Settings tiles
     └── ui/                             Compose screens (Switches and Wireless tabs) and theme
 ```
+
+Unit tests for the pure pieces, the QR parser, paired-device decoding and the address logic, live
+under `app/src/test/java/app/devswitch/wireless/`. The device-only parts (Shizuku, the hidden
+adb service, mDNS, the camera) are verified on a phone rather than in unit tests.
 
 ## License
 
