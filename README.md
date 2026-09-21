@@ -208,7 +208,7 @@ only when a gitignored `keystore.properties` is present (see `keystore.propertie
 left unsigned otherwise, never signed with the debug key, and Google Play's encrypted dependency blob
 is left out of every artifact.
 
-To cut a release, build with a JDK 17 or 21 (what F-Droid's build server uses) with
+To cut a release, build with JDK 17 (what F-Droid's build server uses) with
 `./gradlew clean assembleRelease`, tag the commit `vX.Y` and push the tag, then create a GitHub
 release for it and attach the APK as `DevSwitch-X.Y.apk`. The listing text, changelog, icon and
 screenshots F-Droid shows live in `fastlane/metadata/android/en-US/`. A ready-to-submit

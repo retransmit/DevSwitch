@@ -17,9 +17,10 @@ filled into `app.devswitch.yml`.
 
 1. Bump `versionCode` and `versionName` in `app/build.gradle.kts` and add
    `fastlane/metadata/android/en-US/changelogs/<versionCode>.txt`.
-2. Build with a JDK 17 or 21, which is what F-Droid's build server uses, so R8 produces identical
-   output: `./gradlew clean assembleRelease`. The signed APK is
-   `app/build/outputs/apk/release/app-release.apk`.
+2. Build with JDK 17, which is what F-Droid's build server uses, so R8 produces identical output:
+   `JAVA_HOME=/path/to/jdk-17 ./gradlew clean assembleRelease`. The signed APK is
+   `app/build/outputs/apk/release/app-release.apk`. Building twice and comparing the hashes is a
+   cheap check that nothing on the machine leaks into the output.
 3. Read the signing certificate digest and put it in `AllowedAPKSigningKeys`, lowercase and without
    colons:
 
@@ -46,6 +47,8 @@ filled into `app.devswitch.yml`.
 
 Notes that matter for the reproducible check: the release build is unsigned unless
 `keystore.properties` exists, so F-Droid's own build has no signature to strip; Google Play's
-dependency blob is disabled; there are no native libraries, so no build-id to normalise; and
-F-Droid's Gradle transparency log already lists the Gradle 9.7.1 distribution this project's
-wrapper uses.
+dependency blob is disabled; the only native libraries come from AndroidX and are packaged
+unstripped (`keepDebugSymbols`), so having an NDK or not changes nothing; AGP's
+`version-control-info.textproto` is switched off in the release build type, so the APK does not
+depend on which commit it was built from; and F-Droid's Gradle transparency log already lists the
+Gradle 9.7.1 distribution this project's wrapper uses.

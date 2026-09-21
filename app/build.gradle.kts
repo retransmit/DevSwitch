@@ -48,6 +48,12 @@ android {
                 "proguard-rules.pro",
             )
             signingConfig = if (hasReleaseSigning) signingConfigs.getByName("release") else null
+            // AGP would otherwise write the git revision into META-INF/version-control-info.textproto,
+            // so an APK built from any later commit could never match the published one in F-Droid's
+            // reproducibility check. Nothing reads that file.
+            vcsInfo {
+                include = false
+            }
         }
     }
 
