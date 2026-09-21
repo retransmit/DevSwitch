@@ -22,6 +22,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -35,12 +36,15 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -126,6 +130,8 @@ fun MainScreen(
 
 @Composable
 private fun SwitchesTab(ui: UiState, viewModel: MainViewModel, modifier: Modifier = Modifier) {
+    // Turning something off can cut a computer's connection, so it asks first; turning on never does.
+    var pendingOff by remember { mutableStateOf<DevSetting?>(null) }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -140,14 +146,14 @@ private fun SwitchesTab(ui: UiState, viewModel: MainViewModel, modifier: Modifie
             subtitle = stringResource(R.string.developer_options_hint),
             checked = ui.state.developerOptions,
             enabled = ui.hasPermission,
-            onCheckedChange = { viewModel.toggle(DevSetting.DEVELOPER_OPTIONS, it) },
+            onCheckedChange = { on -> if (on) viewModel.toggle(DevSetting.DEVELOPER_OPTIONS, true) else pendingOff = DevSetting.DEVELOPER_OPTIONS },
         )
         ToggleCard(
             title = stringResource(R.string.usb_debugging),
             subtitle = stringResource(R.string.usb_debugging_hint),
             checked = ui.state.usbDebugging,
             enabled = ui.hasPermission,
-            onCheckedChange = { viewModel.toggle(DevSetting.USB_DEBUGGING, it) },
+            onCheckedChange = { on -> if (on) viewModel.toggle(DevSetting.USB_DEBUGGING, true) else pendingOff = DevSetting.USB_DEBUGGING },
         )
         val wirelessSupported = DevSetting.WIRELESS_DEBUGGING.supported
         ToggleCard(
@@ -157,7 +163,34 @@ private fun SwitchesTab(ui: UiState, viewModel: MainViewModel, modifier: Modifie
             ),
             checked = ui.state.wirelessDebugging,
             enabled = ui.hasPermission && wirelessSupported,
-            onCheckedChange = { viewModel.toggle(DevSetting.WIRELESS_DEBUGGING, it) },
+            onCheckedChange = { on -> if (on) viewModel.toggle(DevSetting.WIRELESS_DEBUGGING, true) else pendingOff = DevSetting.WIRELESS_DEBUGGING },
+        )
+    }
+    pendingOff?.let { setting ->
+        val name = stringResource(
+            when (setting) {
+                DevSetting.DEVELOPER_OPTIONS -> R.string.developer_options
+                DevSetting.USB_DEBUGGING -> R.string.usb_debugging
+                DevSetting.WIRELESS_DEBUGGING -> R.string.wireless_debugging
+            },
+        )
+        val body = stringResource(
+            when (setting) {
+                DevSetting.DEVELOPER_OPTIONS -> R.string.confirm_off_developer
+                DevSetting.USB_DEBUGGING -> R.string.confirm_off_usb
+                DevSetting.WIRELESS_DEBUGGING -> R.string.confirm_off_wireless
+            },
+        )
+        AlertDialog(
+            onDismissRequest = { pendingOff = null },
+            title = { Text(stringResource(R.string.confirm_off_title, name)) },
+            text = { Text(body) },
+            confirmButton = {
+                TextButton(onClick = { viewModel.toggle(setting, false); pendingOff = null }) {
+                    Text(stringResource(R.string.confirm_turn_off))
+                }
+            },
+            dismissButton = { TextButton(onClick = { pendingOff = null }) { Text(stringResource(R.string.cancel)) } },
         )
     }
 }

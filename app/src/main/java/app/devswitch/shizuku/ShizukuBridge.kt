@@ -58,11 +58,19 @@ class ShizukuBridge(context: Context) {
             .version(BuildConfig.VERSION_CODE)
     }
 
+    /** A bound shell-uid user service kept open across several calls. Close it when done. */
+    class ServiceHandle(val service: IShellService, private val release: () -> Unit) : AutoCloseable {
+        override fun close() = release()
+    }
+
     /**
-     * Binds the shell-uid user service, runs [block] on it off the main thread, and unbinds. The
-     * pairing methods must go through here because only this process can reach the adb service.
+     * Binds the shell-uid user service and hands it back still bound, so a session of many calls
+     * (a pairing, polled every couple of seconds) costs one process rather than one per call. The
+     * caller must close the handle; closing stops the service process, so nothing lingers with
+     * shell rights. The pairing methods must go through this service because only its process can
+     * reach the adb system service.
      */
-    suspend fun <T> withService(block: (IShellService) -> T): T = withTimeout(30_000) {
+    suspend fun openService(): ServiceHandle = withTimeout(30_000) {
         var connection: ServiceConnection? = null
         try {
             val service = suspendCancellableCoroutine<IShellService> { continuation ->
@@ -83,10 +91,21 @@ class ShizukuBridge(context: Context) {
                 connection = conn
                 Shizuku.bindUserService(userServiceArgs, conn)
             }
-            withContext(Dispatchers.IO) { block(service) }
+            val bound = connection!!
+            ServiceHandle(service) { runCatching { Shizuku.unbindUserService(userServiceArgs, bound, true) } }
+        } catch (e: Throwable) {
+            connection?.let { runCatching { Shizuku.unbindUserService(userServiceArgs, it, true) } }
+            throw e
+        }
+    }
+
+    /** Binds, runs [block] on the service off the main thread, and unbinds. For one-off calls. */
+    suspend fun <T> withService(block: (IShellService) -> T): T {
+        val handle = openService()
+        try {
+            return withContext(Dispatchers.IO) { block(handle.service) }
         } finally {
-            // remove = true also stops the service process; nothing lingers with shell rights.
-            connection?.let { Shizuku.unbindUserService(userServiceArgs, it, true) }
+            handle.close()
         }
     }
 

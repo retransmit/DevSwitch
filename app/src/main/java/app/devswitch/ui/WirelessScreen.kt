@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -73,6 +74,8 @@ fun WirelessTab(
             viewModel.clearPairingMessage()
         }
     }
+    // Some builds drop wireless debugging the moment the screen sleeps, which would cut a pairing short.
+    KeepScreenOn(ui.pairing != null)
 
     var scanning by remember { mutableStateOf(false) }
     val cameraPermission = rememberLauncherForActivityResult(
@@ -113,7 +116,8 @@ fun WirelessTab(
     val selfPairing = ui.devices.firstOrNull {
         it.service == AdbServiceType.PAIRING && network?.owns(it.host) == true
     }
-    val others = ui.devices.filter { it != self && it != selfPairing }
+    // adb can advertise several connect services at once; anything on the phone's own addresses is this device.
+    val others = ui.devices.filter { network?.owns(it.host) != true }
 
     Column(
         modifier = modifier
@@ -122,7 +126,7 @@ fun WirelessTab(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        ThisDeviceCard(network, self, selfPairing)
+        ThisDeviceCard(network, self, selfPairing, fallbackPort = ui.wirelessPort)
         PairingCard(ui, viewModel, pairingEndpoint = selfPairing?.endpoint, onScan = ::requestScan)
         NetworkDevicesCard(others, scanning = ui.scanning)
     }
@@ -133,6 +137,7 @@ private fun ThisDeviceCard(
     network: NetworkStatus?,
     connect: DiscoveredService?,
     pairing: DiscoveredService?,
+    fallbackPort: Int,
 ) {
     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -144,10 +149,12 @@ private fun ThisDeviceCard(
                 )
             } else {
                 InfoRow("IP address", network.primaryIpv4 ?: "unknown")
-                if (connect != null) {
-                    InfoRow("Wireless debugging", "${connect.host}:${connect.port}")
-                } else {
-                    Text(
+                val ip = network.primaryIpv4
+                when {
+                    connect != null -> InfoRow("Wireless debugging", "${connect.host}:${connect.port}")
+                    // The framework's own port answers before mDNS resolves, when Shizuku can ask it.
+                    fallbackPort > 0 && ip != null -> InfoRow("Wireless debugging", "$ip:$fallbackPort")
+                    else -> Text(
                         "Wireless debugging is off, or its address has not been announced yet. Turn it on from the Switches tab.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -167,6 +174,7 @@ private fun PairingCard(
     onScan: () -> Unit,
 ) {
     val context = LocalContext.current
+    var pendingUnpair by remember { mutableStateOf<PairedDevice?>(null) }
     Card {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text("Pair a computer", style = MaterialTheme.typography.titleMedium)
@@ -254,10 +262,24 @@ private fun PairingCard(
                 HorizontalDivider()
                 Text("Paired computers", style = MaterialTheme.typography.labelLarge)
                 ui.pairedDevices.forEach { device ->
-                    PairedDeviceRow(device) { viewModel.unpair(device) }
+                    PairedDeviceRow(device) { pendingUnpair = device }
                 }
             }
         }
+    }
+    // Unpairing the computer you are connected through drops that connection, so ask first.
+    pendingUnpair?.let { device ->
+        AlertDialog(
+            onDismissRequest = { pendingUnpair = null },
+            title = { Text("Unpair ${device.label}?") },
+            text = {
+                Text("If this is the computer you are connected through, that connection drops and it will have to pair again.")
+            },
+            confirmButton = {
+                TextButton(onClick = { viewModel.unpair(device); pendingUnpair = null }) { Text("Unpair") }
+            },
+            dismissButton = { TextButton(onClick = { pendingUnpair = null }) { Text("Cancel") } },
+        )
     }
 }
 

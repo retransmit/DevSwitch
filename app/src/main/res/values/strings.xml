@@ -34,4 +34,11 @@
     <string name="tile_off">Off</string>
     <string name="tile_needs_setup">Tap to set up</string>
     <string name="tile_unsupported">Not available</string>
+
+    <string name="confirm_off_title">Turn off %1$s?</string>
+    <string name="confirm_off_developer">This also turns off USB and wireless debugging. Any computer connected through either will be disconnected.</string>
+    <string name="confirm_off_usb">A computer connected over USB will be disconnected.</string>
+    <string name="confirm_off_wireless">A computer connected over Wi-Fi will be disconnected. If that is the connection you are using right now, it drops too.</string>
+    <string name="confirm_turn_off">Turn off</string>
+    <string name="cancel">Cancel</string>
 </resources>

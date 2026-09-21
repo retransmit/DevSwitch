@@ -91,6 +91,7 @@ fun QrScannerOverlay(onResult: (String) -> Unit, onClose: () -> Unit) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val executor = remember { Executors.newSingleThreadExecutor() }
     DisposableEffect(Unit) { onDispose { executor.shutdown() } }
+    KeepScreenOn(true)
 
     Surface(color = Color.Black, modifier = Modifier.fillMaxSize()) {
         Box(Modifier.fillMaxSize()) {

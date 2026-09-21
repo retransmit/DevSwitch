@@ -70,6 +70,11 @@ Developer options screen.
   the RSA fingerprint prompt, and wireless debugging still needs pairing.
 - The tiles refuse to toggle on a locked screen and ask for unlock first, so a debugging
   channel cannot be opened from the lock screen.
+- Turning a switch off, or unpairing a computer, asks first, because either can cut the
+  connection a computer is using right now. Turning something on never asks.
+- The screen stays on while a pairing offer or the camera scanner is open, since some builds drop
+  wireless debugging the moment the screen sleeps.
+- A pairing in progress survives switching tabs; it ends only on Stop, completion or a timeout.
 - Beyond WRITE_SECURE_SETTINGS, the app declares ACCESS_NETWORK_STATE and INTERNET, used only by
   the Wireless tab to read this device's IP and to discover adb endpoints on the local network
   over mDNS. No location permission is requested, so no Wi-Fi network name is read.
@@ -142,7 +147,10 @@ the API changed shape at Android 13.
 
 The framework reports a completed pairing through a broadcast that also requires MANAGE_DEBUGGING to
 *receive*, which the app's own process does not hold, so the app cannot listen for it. Instead it
-polls `getPairedDevices()` and notices a new entry.
+watches two things: a new fingerprint in `getPairedDevices()`, which means a new computer paired,
+and the pairing service vanishing from mDNS, which adbd drops the moment pairing ends, so completion
+is seen even when the computer was already paired. The shell service stays bound for the whole
+session, so a pairing costs one process rather than one per poll.
 
 When Shizuku is not running, the Pair card explains this and offers a button that opens Android's own
 Developer options, where pairing works without the app. Device discovery and the address readouts need
