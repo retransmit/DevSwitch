@@ -173,11 +173,6 @@ monochrome layer for themed icons on Android 13 and later. `art/icon.svg` is the
 `art/icon-512.png` is the full-bleed square a store listing needs (Google Play rounds it itself), and
 `art/icon-rounded.png` is the same artwork with rounded corners for pages like this one.
 
-The icon is an original design, drawn from scratch as vector paths from the author's own
-reference image. Its dome and antennae take inspiration from the familiar Android robot
-silhouette, but no Google artwork is reproduced or modified in it. The artwork is covered by the
-project's license like everything else in the repository.
-
 ## Layout
 
 ```
@@ -205,6 +200,5 @@ app/src/main/
 DevSwitch is free software under the GNU General Public License, version 3 or later
 (SPDX-License-Identifier: `GPL-3.0-or-later`). See [LICENSE](LICENSE) for the full text.
 
-The launcher icon is original work by the author, inspired by the Android robot silhouette but
-not derived from any Google asset, and is covered by this same license. The bundled dependencies
-(Jetpack Compose, CameraX, ZXing, Shizuku, HiddenApiBypass) are under the Apache License 2.0.
+The bundled dependencies (Jetpack Compose, CameraX, ZXing, Shizuku, HiddenApiBypass) are under the
+Apache License 2.0.
