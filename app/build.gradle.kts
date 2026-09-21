@@ -58,6 +58,15 @@ android {
         includeInBundle = false
     }
 
+    // Keep every native library exactly as its Maven artifact ships it. AGP would otherwise strip
+    // them only when it happens to find an NDK, so the APK would differ between machines and fail
+    // F-Droid's reproducible-build comparison.
+    packaging {
+        jniLibs {
+            keepDebugSymbols.add("**/*.so")
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
