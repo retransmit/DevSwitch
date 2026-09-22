@@ -11,10 +11,10 @@
         android:name="android.permission.WRITE_SECURE_SETTINGS"
         tools:ignore="ProtectedPermissions" />
 
-    <!-- Reading the device's own IP via ConnectivityManager, and mDNS discovery of adb
-         endpoints on the local network. No location permission is used. -->
+    <!-- Reading whether the device is on Wi-Fi or Ethernet via ConnectivityManager. mDNS discovery
+         goes through the system's NsdManager and the device's own address comes from
+         NetworkInterface, so the app opens no sockets and does not need INTERNET. -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.INTERNET" />
 
     <!-- Scanning Android Studio's pairing QR with the camera. The code flow needs no camera. -->
     <uses-permission android:name="android.permission.CAMERA" />
