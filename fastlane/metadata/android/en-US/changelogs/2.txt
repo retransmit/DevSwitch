@@ -1,0 +1,2 @@
+Fixes a crash on launch in 1.0 as published on F-Droid. That build had the INTERNET permission removed, but Android's network service discovery refuses clients without it, so the Wireless tab could not be set up. DevSwitch still opens no sockets and contacts no server.
+- Device discovery now reports nothing instead of crashing if the system refuses it
