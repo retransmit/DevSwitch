@@ -11,10 +11,12 @@
         android:name="android.permission.WRITE_SECURE_SETTINGS"
         tools:ignore="ProtectedPermissions" />
 
-    <!-- Reading whether the device is on Wi-Fi or Ethernet via ConnectivityManager. mDNS discovery
-         goes through the system's NsdManager and the device's own address comes from
-         NetworkInterface, so the app opens no sockets and does not need INTERNET. -->
+    <!-- Reading whether the device is on Wi-Fi or Ethernet via ConnectivityManager, and mDNS
+         discovery of adb endpoints through the system's NsdManager. The app opens no sockets, but
+         NsdService admits only clients that hold INTERNET: without it getSystemService throws and
+         the app died on launch (1.0 as published on F-Droid). -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <!-- Scanning Android Studio's pairing QR with the camera. The code flow needs no camera. -->
     <uses-permission android:name="android.permission.CAMERA" />

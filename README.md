@@ -75,10 +75,10 @@ Developer options screen.
 - The screen stays on while a pairing offer or the camera scanner is open, since some builds drop
   wireless debugging the moment the screen sleeps.
 - A pairing in progress survives switching tabs; it ends only on Stop, completion or a timeout.
-- Beyond WRITE_SECURE_SETTINGS, the app declares only ACCESS_NETWORK_STATE, used by the Wireless
-  tab to tell Wi-Fi from Ethernet. Discovery of adb endpoints goes through the system's mDNS
-  service and the device's own IP comes from its interfaces, so the app opens no sockets and does
-  not hold INTERNET. No location permission is requested, so no Wi-Fi network name is read.
+- Beyond WRITE_SECURE_SETTINGS, the app declares ACCESS_NETWORK_STATE and INTERNET, both for the
+  Wireless tab. INTERNET is there because Android's network service discovery (NsdService) admits
+  only clients that hold it; the app itself opens no sockets and contacts no server. No location
+  permission is requested, so no Wi-Fi network name is read.
 
 ## Tested
 

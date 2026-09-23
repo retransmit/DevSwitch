@@ -31,16 +31,29 @@ data class DiscoveredService(
 }
 
 /**
- * Discovers adb-over-Wi-Fi endpoints on the current network with [NsdManager]. Needs no
- * permission and opens no internet socket: resolution goes through the system mDNS daemon.
+ * Discovers adb-over-Wi-Fi endpoints on the current network with [NsdManager]. Resolution goes
+ * through the system mDNS daemon, so the app opens no socket of its own, but NsdService admits
+ * only clients that hold INTERNET, which is why the manifest declares it. Should the system still
+ * refuse the app, discovery reports an empty list rather than taking the whole screen down.
  *
  * resolveService cannot run two lookups at once on older releases, so found services are
  * resolved through a single queue rather than concurrently.
  */
 class DeviceDiscovery(context: Context) {
-    private val nsd = context.applicationContext.getSystemService(NsdManager::class.java)
+    private val appContext = context.applicationContext
+
+    /** Fetched on first use: the system service call itself throws when INTERNET is missing. */
+    private val nsd: NsdManager? by lazy {
+        runCatching { appContext.getSystemService(NsdManager::class.java) }.getOrNull()
+    }
 
     fun discover(): Flow<List<DiscoveredService>> = callbackFlow {
+        val manager = nsd
+        if (manager == null) {
+            trySend(emptyList())
+            awaitClose()
+            return@callbackFlow
+        }
         val found = LinkedHashMap<String, DiscoveredService>()
         val queue = ArrayDeque<Pair<NsdServiceInfo, AdbServiceType>>()
         var resolving = false
@@ -52,7 +65,7 @@ class DeviceDiscovery(context: Context) {
             if (resolving) return
             val (info, type) = queue.removeFirstOrNull() ?: return
             resolving = true
-            nsd.resolveService(info, object : NsdManager.ResolveListener {
+            manager.resolveService(info, object : NsdManager.ResolveListener {
                 override fun onServiceResolved(resolved: NsdServiceInfo) {
                     @Suppress("DEPRECATION") val address: InetAddress? = resolved.host
                     val host = (address as? Inet4Address)?.hostAddress ?: address?.hostAddress
@@ -82,11 +95,11 @@ class DeviceDiscovery(context: Context) {
                     if (found.remove(key(info.serviceName, type)) != null) publish()
                 }
             }
-            runCatching { nsd.discoverServices(type.type, NsdManager.PROTOCOL_DNS_SD, listener) }
+            runCatching { manager.discoverServices(type.type, NsdManager.PROTOCOL_DNS_SD, listener) }
             listener
         }
 
         publish()
-        awaitClose { listeners.forEach { runCatching { nsd.stopServiceDiscovery(it) } } }
+        awaitClose { listeners.forEach { runCatching { manager.stopServiceDiscovery(it) } } }
     }
 }
