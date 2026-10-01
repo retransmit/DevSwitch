@@ -1,0 +1,2 @@
+- Chinese interface: Traditional (繁體中文) and Simplified (简体中文), contributed by Bhavyashah94 and lxBlazarxl
+- The app language can now be chosen per app in Android's settings (Android 13 and newer)
