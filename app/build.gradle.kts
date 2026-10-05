@@ -5,7 +5,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
-// Release signing comes from a gitignored keystore.properties (see keystore.properties.example).
+// Release signing comes from a gitignored keystore.properties.
 // Without it the release build is left unsigned rather than signed with the debug key: F-Droid
 // rebuilds the app and compares its build against the APK published on GitHub, which only works
 // when its own build carries no signature to strip.
