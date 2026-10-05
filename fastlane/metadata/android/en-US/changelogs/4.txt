@@ -1,0 +1,4 @@
+- New home screen widget with a switch for each of the three settings
+- New shortcuts on the app icon: long-press it to flip a setting without opening the app
+- The Wireless tab now shows the right address after wireless debugging is switched off and on again; it could keep showing the old port
+- Updated libraries
