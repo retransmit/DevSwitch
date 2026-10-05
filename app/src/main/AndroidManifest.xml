@@ -28,6 +28,7 @@
     </queries>
 
     <application
+        android:name=".DevSwitchApp"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
@@ -43,7 +44,42 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
         </activity>
+
+        <!-- Launcher shortcuts land here. It has no screen: it flips one setting and finishes.
+             Not exported; the launcher starts shortcuts on the app's behalf. -->
+        <activity
+            android:name=".quick.ToggleActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.NoDisplay" />
+
+        <!-- Home screen widget. Exported so the launcher can bind it, which is why it only
+             draws: a tap is delivered to the private receiver below. -->
+        <receiver
+            android:name=".quick.SwitchesWidget"
+            android:exported="true"
+            android:label="@string/widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <!-- A protected system broadcast, also sent when this app's own language changes. -->
+                <action android:name="android.intent.action.LOCALE_CHANGED" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_switches" />
+        </receiver>
+
+        <!-- Flips a setting when a widget cell is tapped. Not exported: if it were, any app
+             could send the broadcast and switch debugging on. -->
+        <receiver
+            android:name=".quick.WidgetToggleReceiver"
+            android:exported="false" />
 
         <!-- Receives the Shizuku binder; required by the Shizuku API. -->
         <provider

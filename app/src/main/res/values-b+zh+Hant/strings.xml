@@ -35,6 +35,17 @@
     <string name="tile_needs_setup">輕觸以進行設定</string>
     <string name="tile_unsupported">不可用</string>
 
+    <!-- Home screen widget and launcher shortcuts -->
+    <string name="widget_name">偵錯開關</string>
+    <string name="widget_description">從主畫面開啟或關閉開發人員選項、USB 偵錯和無線偵錯。</string>
+    <string name="widget_short_developer">開發人員</string>
+    <string name="widget_short_usb">USB</string>
+    <string name="widget_short_wireless">無線</string>
+    <string name="quick_turned_on">已開啟%1$s</string>
+    <string name="quick_turned_off">已關閉%1$s</string>
+    <string name="quick_failed">無法變更%1$s</string>
+    <string name="quick_unlock_first">請先解鎖手機</string>
+
     <string name="confirm_off_title">要關閉 %1$s 嗎？</string>
     <string name="confirm_off_developer">這也會同時關閉 USB 偵錯與無線偵錯。透過這兩者連線的任何電腦都將中斷連線。</string>
     <string name="confirm_off_usb">透過 USB 連線的電腦將會中斷連線。</string>

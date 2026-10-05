@@ -35,6 +35,17 @@
     <string name="tile_needs_setup">轻触以进行设置</string>
     <string name="tile_unsupported">不可用</string>
 
+    <!-- Home screen widget and launcher shortcuts -->
+    <string name="widget_name">调试开关</string>
+    <string name="widget_description">从主屏幕开启或关闭开发者选项、USB 调试和无线调试。</string>
+    <string name="widget_short_developer">开发者</string>
+    <string name="widget_short_usb">USB</string>
+    <string name="widget_short_wireless">无线</string>
+    <string name="quick_turned_on">已开启%1$s</string>
+    <string name="quick_turned_off">已关闭%1$s</string>
+    <string name="quick_failed">无法更改%1$s</string>
+    <string name="quick_unlock_first">请先解锁手机</string>
+
     <string name="confirm_off_title">要关闭 %1$s 吗？</string>
     <string name="confirm_off_developer">这也会同时关闭 USB 调试与无线调试。通过这两者连接的任何电脑都将断开连接。</string>
     <string name="confirm_off_usb">通过 USB 连接的电脑将会断开连接。</string>

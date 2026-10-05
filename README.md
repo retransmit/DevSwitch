@@ -3,8 +3,8 @@
 # DevSwitch
 
 A small Android app that switches **Developer options**, **USB debugging** and
-**Wireless debugging** on and off, from a screen with three switches and from three
-Quick Settings tiles.
+**Wireless debugging** on and off, from a screen with three switches, from three
+Quick Settings tiles, from a home screen widget, and from shortcuts on the app icon.
 
 Android only. iOS has no equivalent: apps cannot touch Developer Mode there.
 

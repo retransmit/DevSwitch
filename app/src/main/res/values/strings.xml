@@ -35,6 +35,17 @@
     <string name="tile_needs_setup">Tap to set up</string>
     <string name="tile_unsupported">Not available</string>
 
+    <!-- Home screen widget and launcher shortcuts -->
+    <string name="widget_name">Debugging switches</string>
+    <string name="widget_description">Turn Developer options, USB debugging and wireless debugging on or off from the home screen.</string>
+    <string name="widget_short_developer">Developer</string>
+    <string name="widget_short_usb">USB</string>
+    <string name="widget_short_wireless">Wireless</string>
+    <string name="quick_turned_on">%1$s turned on</string>
+    <string name="quick_turned_off">%1$s turned off</string>
+    <string name="quick_failed">Could not change %1$s</string>
+    <string name="quick_unlock_first">Unlock the phone first</string>
+
     <string name="confirm_off_title">Turn off %1$s?</string>
     <string name="confirm_off_developer">This also turns off USB and wireless debugging. Any computer connected through either will be disconnected.</string>
     <string name="confirm_off_usb">A computer connected over USB will be disconnected.</string>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Long-press shortcuts on the launcher icon. Each one flips a setting through ToggleActivity. -->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="toggle_wireless"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_wifi"
+        android:shortcutShortLabel="@string/wireless_debugging">
+        <intent
+            android:action="app.devswitch.action.TOGGLE_WIRELESS_DEBUGGING"
+            android:targetPackage="app.devswitch"
+            android:targetClass="app.devswitch.quick.ToggleActivity" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="toggle_usb"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_usb"
+        android:shortcutShortLabel="@string/usb_debugging">
+        <intent
+            android:action="app.devswitch.action.TOGGLE_USB_DEBUGGING"
+            android:targetPackage="app.devswitch"
+            android:targetClass="app.devswitch.quick.ToggleActivity" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="toggle_developer"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_dev"
+        android:shortcutShortLabel="@string/developer_options">
+        <intent
+            android:action="app.devswitch.action.TOGGLE_DEVELOPER_OPTIONS"
+            android:targetPackage="app.devswitch"
+            android:targetClass="app.devswitch.quick.ToggleActivity" />
+    </shortcut>
+</shortcuts>
