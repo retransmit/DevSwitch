@@ -57,6 +57,7 @@ import app.devswitch.wireless.AdbServiceType
 import app.devswitch.wireless.DiscoveredService
 import app.devswitch.wireless.NetworkStatus
 import app.devswitch.wireless.PairedDevice
+import app.devswitch.wireless.pickSelfConnect
 
 @Composable
 fun WirelessTab(
@@ -108,9 +109,7 @@ fun WirelessTab(
     }
 
     val network = ui.network
-    val self = ui.devices.firstOrNull {
-        it.service == AdbServiceType.CONNECT && network?.owns(it.host) == true
-    }
+    val self = pickSelfConnect(ui.devices, network, ui.wirelessOn, ui.wirelessPort)
     val selfPairing = ui.devices.firstOrNull {
         it.service == AdbServiceType.PAIRING && network?.owns(it.host) == true
     }
@@ -124,7 +123,7 @@ fun WirelessTab(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        ThisDeviceCard(network, self, selfPairing, fallbackPort = ui.wirelessPort)
+        ThisDeviceCard(network, self, selfPairing, fallbackPort = if (ui.wirelessOn) ui.wirelessPort else 0)
         PairingCard(ui, viewModel, pairingEndpoint = selfPairing?.endpoint, onScan = ::requestScan)
         NetworkDevicesCard(others, scanning = ui.scanning)
     }

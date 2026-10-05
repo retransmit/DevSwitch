@@ -1,0 +1,2 @@
+- 中文界面：繁体中文与简体中文，由 Bhavyashah94 与 lxBlazarxl 贡献
+- 可在 Android 设置中为本应用单独选择语言（Android 13 及以上版本）

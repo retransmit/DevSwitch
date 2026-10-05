@@ -1,0 +1,2 @@
+- 中文介面：繁體中文與簡體中文，由 Bhavyashah94 與 lxBlazarxl 貢獻
+- 可在 Android 設定中為本應用程式個別選擇語言（Android 13 及以上版本）

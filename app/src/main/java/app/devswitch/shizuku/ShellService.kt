@@ -36,7 +36,10 @@ class ShellService : IShellService.Stub {
 
     private fun exemptHiddenApi() {
         // The Shizuku process may already permit hidden-API access; do it anyway, defensively.
-        runCatching { HiddenApiBypass.addHiddenApiExemptions("L") }
+        // Hidden-API restrictions, and this call, only exist from Android 9 on.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            runCatching { HiddenApiBypass.addHiddenApiExemptions("L") }
+        }
     }
 
     override fun destroy() {

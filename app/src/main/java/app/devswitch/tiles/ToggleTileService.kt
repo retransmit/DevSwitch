@@ -3,6 +3,7 @@
 
 package app.devswitch.tiles
 
+import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Intent
 import android.database.ContentObserver
@@ -71,6 +72,9 @@ abstract class ToggleTileService(private val setting: DevSetting) : TileService(
         tile.updateTile()
     }
 
+    // Lint flags the Intent overload even though it only runs below Android 14, where the
+    // PendingIntent overload does not exist yet.
+    @SuppressLint("StartActivityAndCollapseDeprecated")
     private fun openApp() {
         val intent = Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {

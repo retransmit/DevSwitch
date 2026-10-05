@@ -24,6 +24,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -33,6 +35,9 @@ import kotlin.random.Random
 // ~3 minutes at a 2s interval, longer than a person needs to scan and confirm.
 private const val PAIRING_POLL_ATTEMPTS = 90
 private const val PAIRING_POLL_MS = 2_000L
+
+// adbd needs a moment after the setting flips before it reports its new port.
+private const val PORT_SETTLE_MS = 1_500L
 
 /** An active pairing offer: a QR to scan and the same code to type into `adb pair`. */
 data class PairingSession(
@@ -58,6 +63,8 @@ data class WirelessUiState(
     val pairingMessage: PairingNote? = null,
     /** The connect port as the framework reports it; 0 when unknown or off. Fills in before mDNS does. */
     val wirelessPort: Int = 0,
+    /** Whether the wireless debugging setting is on. Off means any address still announced is stale. */
+    val wirelessOn: Boolean = false,
 )
 
 /** Backs the Wireless tab: device discovery, this device's address, and computer pairing. */
@@ -84,6 +91,16 @@ class WirelessViewModel(app: Application) : AndroidViewModel(app) {
     init {
         Shizuku.addBinderReceivedListenerSticky(binderListener)
         Shizuku.addRequestPermissionResultListener(permissionListener)
+        // Android picks a new port every time wireless debugging is switched on, so ask again then.
+        viewModelScope.launch {
+            settings.observe().map { it.wirelessDebugging }.distinctUntilChanged().collect { on ->
+                _ui.update { it.copy(wirelessOn = on, wirelessPort = if (on) it.wirelessPort else 0) }
+                if (on) {
+                    delay(PORT_SETTLE_MS)
+                    refreshPairing()
+                }
+            }
+        }
     }
 
     fun refreshNetwork() = _ui.update { it.copy(network = info.current()) }
