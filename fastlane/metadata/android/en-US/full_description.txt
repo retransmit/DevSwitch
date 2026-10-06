@@ -1,4 +1,4 @@
-DevSwitch turns Developer options, USB debugging and Wireless debugging on and off from one screen and from three Quick Settings tiles. It writes the same system settings Android's own Settings app does, so the system reacts immediately: adbd starts or stops, and the Developer options screen appears or hides.
+DevSwitch turns Developer options, USB debugging and Wireless debugging on and off from one screen, three Quick Settings tiles, a home screen widget, and shortcuts on the app icon. It writes the same system settings Android's own Settings app does, so the system reacts immediately: adbd starts or stops, and the Developer options screen appears or hides.
 
 One-time setup
 
@@ -14,7 +14,7 @@ Shows this device's IP address and its live wireless debugging address, plus a s
 
 Safety
 
-Turning a switch off, or unpairing a computer, asks first, because either can cut the connection a computer is using. The tiles refuse to toggle from the lock screen.
+Turning a switch off, or unpairing a computer, asks first, because either can cut the connection a computer is using. The tiles, the widget and the shortcuts do nothing while the phone is locked.
 
 Privacy
 
