@@ -1,0 +1,4 @@
+- Nuevo widget de la pantalla de inicio con un interruptor para cada uno de los tres ajustes
+- Nuevos accesos directos en el icono de la app: mantenlo pulsado para cambiar un ajuste sin abrir la app
+- La pestaña Inalámbrico muestra ahora la dirección correcta tras desactivar y volver a activar la depuración inalámbrica; podía seguir mostrando el puerto antiguo
+- Bibliotecas actualizadas

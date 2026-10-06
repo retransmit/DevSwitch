@@ -1,0 +1,23 @@
+DevSwitch active et désactive les Options pour les développeurs, le débogage USB et le débogage sans fil depuis un seul écran, trois blocs de Réglages rapides, un widget d'écran d'accueil et des raccourcis sur l'icône de l'appli. Il écrit les mêmes paramètres système que l'appli Paramètres d'Android, le système réagit donc immédiatement : adbd démarre ou s'arrête, et l'écran Options pour les développeurs apparaît ou disparaît.
+
+Configuration initiale
+
+Android ne laisse une appli modifier ces paramètres que si elle détient WRITE_SECURE_SETTINGS, qui ne peut pas être demandée par une boîte de dialogue. Accordez-la une fois, de l'une de ces trois façons, et elle est conservée après un redémarrage et les mises à jour :
+
+- Depuis un ordinateur : adb shell pm grant app.devswitch android.permission.WRITE_SECURE_SETTINGS
+- Sur le téléphone, par Shizuku, sans ordinateur
+- Avec root
+
+Onglet Sans fil
+
+Affiche l'adresse IP de cet appareil et son adresse actuelle de débogage sans fil, et recherche les appareils adb sur le Wi-Fi. Avec Shizuku en cours d'exécution, il liste aussi les ordinateurs associés et peut en associer un nouveau, soit en affichant un code pour adb pair, soit en scannant le QR affiché par Android Studio.
+
+Sécurité
+
+Désactiver un interrupteur ou dissocier un ordinateur demande d'abord confirmation, car l'un comme l'autre peut couper la connexion qu'un ordinateur utilise. Les blocs, le widget et les raccourcis n'agissent pas quand le téléphone est verrouillé.
+
+Confidentialité
+
+Aucun service réseau, aucun compte, aucune statistique. Le seul usage du réseau est la détection locale des appareils adb sur votre propre Wi-Fi.
+
+Logiciel libre sous GPLv3.

@@ -1,0 +1,23 @@
+DevSwitch activa y desactiva las Opciones para desarrolladores, la depuración por USB y la depuración inalámbrica desde una sola pantalla, tres recuadros de Ajustes rápidos, un widget de la pantalla de inicio y accesos directos en el icono de la app. Escribe los mismos ajustes del sistema que la app Ajustes de Android, así que el sistema reacciona al instante: adbd se inicia o se detiene, y la pantalla Opciones para desarrolladores aparece o se oculta.
+
+Configuración inicial
+
+Android solo permite que una app cambie estos ajustes si tiene WRITE_SECURE_SETTINGS, que no se puede pedir con un cuadro de diálogo. Concédelo una vez, de cualquiera de estas tres formas, y se conserva tras reiniciar y actualizar:
+
+- Desde un ordenador: adb shell pm grant app.devswitch android.permission.WRITE_SECURE_SETTINGS
+- En el teléfono, mediante Shizuku, sin necesidad de ordenador
+- Con root
+
+Pestaña Inalámbrico
+
+Muestra la dirección IP de este dispositivo y su dirección actual de depuración inalámbrica, además de buscar dispositivos adb en el Wi-Fi. Con Shizuku en ejecución también lista los ordenadores vinculados y puede vincular uno nuevo, ya sea mostrando un código para adb pair o escaneando el QR que muestra Android Studio.
+
+Seguridad
+
+Desactivar un interruptor o desvincular un ordenador pide confirmación antes, porque cualquiera de las dos cosas puede cortar la conexión que un ordenador está usando. Los recuadros, el widget y los accesos directos no actúan con el teléfono bloqueado.
+
+Privacidad
+
+Sin servicios de red, sin cuentas, sin analíticas. El único uso de la red es la detección local de dispositivos adb en tu propio Wi-Fi.
+
+Software libre bajo la GPLv3.

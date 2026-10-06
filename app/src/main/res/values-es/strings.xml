@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DevSwitch</string>
+
+    <string name="tab_switches">Interruptores</string>
+    <string name="tab_wireless">Inalámbrico</string>
+
+    <string name="developer_options">Opciones para desarrolladores</string>
+    <string name="developer_options_hint">Muestra u oculta la pantalla Opciones para desarrolladores en Ajustes. Al desactivarla también se desactivan los dos interruptores de depuración, igual que en Ajustes.</string>
+    <string name="usb_debugging">Depuración por USB</string>
+    <string name="usb_debugging_hint">Permite que un ordenador conectado por USB use ADB. Un ordenador nuevo aún debe autorizarse en este teléfono.</string>
+    <string name="wireless_debugging">Depuración inalámbrica</string>
+    <string name="wireless_debugging_hint">ADB por Wi-Fi (sigue siendo necesario vincular). Requiere una conexión Wi-Fi activa; Android la desactiva cuando se pierde el Wi-Fi.</string>
+    <string name="wireless_debugging_unsupported">Requiere Android 11 o posterior.</string>
+
+    <string name="ready_title">Listo</string>
+    <string name="ready_body">WRITE_SECURE_SETTINGS está concedido. Los interruptores de abajo se aplican al instante, y hay tres recuadros de Ajustes rápidos disponibles en el editor de recuadros.</string>
+
+    <string name="setup_title">Hace falta una configuración inicial</string>
+    <string name="setup_body">Android solo permite que una app cambie estos ajustes si tiene WRITE_SECURE_SETTINGS, que no se puede pedir con un cuadro de diálogo. Concédelo una vez con cualquiera de las opciones de abajo. Se conserva tras reiniciar y actualizar la app.</string>
+    <string name="setup_adb_step">Desde un ordenador con ADB (la depuración por USB debe estar activada para este paso):</string>
+    <string name="copy_command">Copiar comando</string>
+    <string name="setup_shizuku_step">O en este teléfono, sin ordenador:</string>
+    <string name="shizuku_get">Obtener Shizuku</string>
+    <string name="shizuku_start">Iniciar Shizuku</string>
+    <string name="shizuku_allow">Permitir acceso a Shizuku</string>
+    <string name="shizuku_grant">Conceder con Shizuku</string>
+    <string name="root_grant">Conceder con root</string>
+
+    <string name="tile_developer_options">Opciones para desarrolladores</string>
+    <string name="tile_usb_debugging">Depuración por USB</string>
+    <string name="tile_wireless_debugging">Depuración inalámbrica</string>
+    <string name="tile_on">Activado</string>
+    <string name="tile_off">Desactivado</string>
+    <string name="tile_needs_setup">Toca para configurar</string>
+    <string name="tile_unsupported">No disponible</string>
+
+    <!-- Home screen widget and launcher shortcuts -->
+    <string name="widget_name">Interruptores de depuración</string>
+    <string name="widget_description">Activa o desactiva las opciones para desarrolladores, la depuración por USB y la depuración inalámbrica desde la pantalla de inicio.</string>
+    <string name="widget_short_developer">Desarrollo</string>
+    <string name="widget_short_usb">USB</string>
+    <string name="widget_short_wireless">Wi-Fi</string>
+    <string name="quick_turned_on">%1$s: activado</string>
+    <string name="quick_turned_off">%1$s: desactivado</string>
+    <string name="quick_failed">No se pudo cambiar: %1$s</string>
+    <string name="quick_unlock_first">Desbloquea el teléfono primero</string>
+
+    <string name="confirm_off_title">¿Desactivar %1$s?</string>
+    <string name="confirm_off_developer">También se desactivan la depuración por USB y la inalámbrica. Cualquier ordenador conectado por una de ellas se desconectará.</string>
+    <string name="confirm_off_usb">Un ordenador conectado por USB se desconectará.</string>
+    <string name="confirm_off_wireless">Un ordenador conectado por Wi-Fi se desconectará. Si es la conexión que estás usando ahora mismo, también se cortará.</string>
+    <string name="confirm_turn_off">Desactivar</string>
+    <string name="cancel">Cancelar</string>
+
+    <!-- Wireless tab: this device -->
+    <string name="wireless_this_device">Este dispositivo</string>
+    <string name="wireless_no_wifi">Sin conexión Wi-Fi. La depuración inalámbrica necesita una red.</string>
+    <string name="wireless_ip">Dirección IP</string>
+    <string name="wireless_unknown">desconocida</string>
+    <string name="wireless_off_hint">La depuración inalámbrica está desactivada o su dirección aún no se ha anunciado. Actívala en la pestaña Interruptores.</string>
+    <string name="wireless_pairing_port">Puerto de vinculación</string>
+    <string name="service_pairing">Vinculación</string>
+
+    <!-- Wireless tab: pairing card -->
+    <string name="pair_title">Vincular un ordenador</string>
+    <string name="pair_shizuku_permission">Shizuku está en ejecución. Permite que DevSwitch lo use; así funcionarán aquí la vinculación y la lista de ordenadores vinculados.</string>
+    <string name="pair_grant_shizuku">Conceder acceso a Shizuku</string>
+    <string name="pair_shizuku_not_running">Shizuku está instalado pero no iniciado. Inícialo y vuelve a abrir esta pestaña.</string>
+    <string name="pair_open_shizuku">Abrir Shizuku</string>
+    <string name="pair_android_settings">Ajustes de Android</string>
+    <string name="pair_needs_shizuku">Generar un código de vinculación requiere la identidad de shell, que DevSwitch obtiene mediante Shizuku, igual que para concederse su propio permiso. Configura Shizuku en la pestaña Interruptores o vincula desde la pantalla de Android.</string>
+    <string name="pair_open_dev_options">Abrir Opciones para desarrolladores</string>
+    <string name="pair_intro">Vincula un ordenador por Wi-Fi. Muestra un código para escribirlo en adb pair o escanea el QR que muestra Android Studio.</string>
+    <string name="pair_with_code">Vincular con código</string>
+    <string name="pair_scan_studio_qr">Escanear QR de Studio</string>
+    <string name="pair_paired_computers">Ordenadores vinculados</string>
+    <string name="pair_unpair">Desvincular</string>
+    <string name="pair_unpair_title">¿Desvincular %1$s?</string>
+    <string name="pair_unpair_body">Si es el ordenador a través del que estás conectado, esa conexión se cortará y tendrá que vincularse de nuevo.</string>
+    <string name="pair_scanned_finishing">Código de Android Studio escaneado. Terminando la vinculación en este dispositivo.</string>
+    <string name="pair_code_instructions">En el ordenador, ejecuta esto e introduce el código. En Android Studio, usa Pair using pairing code, elige este dispositivo e introdúcelo.</string>
+    <string name="pair_adb_pair_cmd">adb pair %1$s</string>
+    <string name="pair_port_placeholder">&lt;aquí aparece el puerto de vinculación&gt;</string>
+    <string name="pair_code_label">Código de vinculación</string>
+    <string name="pair_waiting_studio">Esperando a Android Studio…</string>
+    <string name="pair_waiting_computer">Esperando a que se vincule un ordenador…</string>
+    <string name="pair_stop">Detener</string>
+    <string name="pair_state_connected">Conectado</string>
+    <string name="pair_state_paired">Vinculado</string>
+
+    <!-- Wireless tab: network list -->
+    <string name="network_title">En esta red</string>
+    <string name="network_none">No se han encontrado otros dispositivos adb. Aparecen aquí mientras tengan activada la depuración inalámbrica y estén en este Wi-Fi.</string>
+    <string name="network_resolving">resolviendo…</string>
+
+    <!-- QR scanner -->
+    <string name="scanner_instruction">En Android Studio, abre Pair using QR code y apunta la cámara hacia él.</string>
+    <string name="scanner_wrong_qr">Ese no es un QR de vinculación de Android. Sigue buscando el que muestra Android Studio.</string>
+
+    <!-- Pairing messages, resolved on screen from the view model -->
+    <string name="msg_camera_permission">Se necesita el permiso de cámara para escanear el QR.</string>
+    <string name="msg_lost_shizuku">Se perdió el contacto con Shizuku, así que la vinculación se detuvo.</string>
+    <string name="msg_paired_with">Vinculado con %1$s</string>
+    <string name="msg_pairing_finished">Vinculación terminada.</string>
+    <string name="msg_pairing_timeout">Se agotó el tiempo de vinculación. Empieza de nuevo para reintentarlo.</string>
+    <string name="pair_error_timeout">No se pudo iniciar la vinculación. Shizuku tardó demasiado en responder.</string>
+    <string name="pair_error_no_response">No se pudo iniciar la vinculación. El servicio de Shizuku no respondió. ¿Sigue Shizuku en ejecución?</string>
+    <string name="pair_error_unavailable">No se pudo iniciar la vinculación. El servicio adb no es accesible en este dispositivo.</string>
+    <string name="pair_error_not_permitted">No se pudo iniciar la vinculación. No está permitido. Comprueba que el acceso a Shizuku sigue concedido.</string>
+    <string name="pair_error_generic">No se pudo iniciar la vinculación. Consulta el registro para más detalles.</string>
+</resources>

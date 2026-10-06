@@ -1,0 +1,4 @@
+- Nouveau widget d'écran d'accueil avec un interrupteur pour chacun des trois paramètres
+- Nouveaux raccourcis sur l'icône de l'appli : appuyez longuement dessus pour changer un paramètre sans ouvrir l'appli
+- L'onglet Sans fil affiche désormais la bonne adresse après avoir désactivé puis réactivé le débogage sans fil ; il pouvait continuer d'afficher l'ancien port
+- Bibliothèques mises à jour

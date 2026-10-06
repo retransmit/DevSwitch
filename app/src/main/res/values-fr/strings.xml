@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DevSwitch</string>
+
+    <string name="tab_switches">Interrupteurs</string>
+    <string name="tab_wireless">Sans fil</string>
+
+    <string name="developer_options">Options pour les développeurs</string>
+    <string name="developer_options_hint">Affiche ou masque l\'écran Options pour les développeurs dans les Paramètres. Les désactiver désactive aussi les deux interrupteurs de débogage, comme le font les Paramètres.</string>
+    <string name="usb_debugging">Débogage USB</string>
+    <string name="usb_debugging_hint">Permet à un ordinateur connecté en USB d\'utiliser ADB. Un nouvel ordinateur doit toujours être autorisé sur ce téléphone.</string>
+    <string name="wireless_debugging">Débogage sans fil</string>
+    <string name="wireless_debugging_hint">ADB par Wi-Fi (l\'association reste nécessaire). Nécessite une connexion Wi-Fi active ; Android le désactive dès que le Wi-Fi est perdu.</string>
+    <string name="wireless_debugging_unsupported">Nécessite Android 11 ou version ultérieure.</string>
+
+    <string name="ready_title">Prêt</string>
+    <string name="ready_body">WRITE_SECURE_SETTINGS est accordée. Les interrupteurs ci-dessous s\'appliquent immédiatement, et trois blocs de Réglages rapides sont disponibles dans l\'éditeur de blocs.</string>
+
+    <string name="setup_title">Configuration initiale requise</string>
+    <string name="setup_body">Android ne laisse une appli modifier ces paramètres que si elle détient WRITE_SECURE_SETTINGS, qui ne peut pas être demandée par une boîte de dialogue. Accordez-la une fois avec l\'une des options ci-dessous. Elle est conservée après un redémarrage et les mises à jour de l\'appli.</string>
+    <string name="setup_adb_step">Depuis un ordinateur avec ADB (le débogage USB doit être activé pour cette étape) :</string>
+    <string name="copy_command">Copier la commande</string>
+    <string name="setup_shizuku_step">Ou sur ce téléphone, sans ordinateur :</string>
+    <string name="shizuku_get">Obtenir Shizuku</string>
+    <string name="shizuku_start">Démarrer Shizuku</string>
+    <string name="shizuku_allow">Autoriser l\'accès à Shizuku</string>
+    <string name="shizuku_grant">Accorder avec Shizuku</string>
+    <string name="root_grant">Accorder avec root</string>
+
+    <string name="tile_developer_options">Options pour les développeurs</string>
+    <string name="tile_usb_debugging">Débogage USB</string>
+    <string name="tile_wireless_debugging">Débogage sans fil</string>
+    <string name="tile_on">Activé</string>
+    <string name="tile_off">Désactivé</string>
+    <string name="tile_needs_setup">Appuyez pour configurer</string>
+    <string name="tile_unsupported">Non disponible</string>
+
+    <!-- Home screen widget and launcher shortcuts -->
+    <string name="widget_name">Interrupteurs de débogage</string>
+    <string name="widget_description">Activez ou désactivez les options pour les développeurs, le débogage USB et le débogage sans fil depuis l\'écran d\'accueil.</string>
+    <string name="widget_short_developer">Dév.</string>
+    <string name="widget_short_usb">USB</string>
+    <string name="widget_short_wireless">Sans fil</string>
+    <string name="quick_turned_on">%1$s : activé</string>
+    <string name="quick_turned_off">%1$s : désactivé</string>
+    <string name="quick_failed">Impossible de modifier : %1$s</string>
+    <string name="quick_unlock_first">Déverrouillez d\'abord le téléphone</string>
+
+    <string name="confirm_off_title">Désactiver %1$s ?</string>
+    <string name="confirm_off_developer">Cela désactive aussi le débogage USB et le débogage sans fil. Tout ordinateur connecté par l\'un ou l\'autre sera déconnecté.</string>
+    <string name="confirm_off_usb">Un ordinateur connecté en USB sera déconnecté.</string>
+    <string name="confirm_off_wireless">Un ordinateur connecté en Wi-Fi sera déconnecté. Si c\'est la connexion que vous utilisez en ce moment, elle sera coupée aussi.</string>
+    <string name="confirm_turn_off">Désactiver</string>
+    <string name="cancel">Annuler</string>
+
+    <!-- Wireless tab: this device -->
+    <string name="wireless_this_device">Cet appareil</string>
+    <string name="wireless_no_wifi">Non connecté au Wi-Fi. Le débogage sans fil a besoin d\'un réseau.</string>
+    <string name="wireless_ip">Adresse IP</string>
+    <string name="wireless_unknown">inconnue</string>
+    <string name="wireless_off_hint">Le débogage sans fil est désactivé, ou son adresse n\'a pas encore été annoncée. Activez-le depuis l\'onglet Interrupteurs.</string>
+    <string name="wireless_pairing_port">Port d\'association</string>
+    <string name="service_pairing">Association</string>
+
+    <!-- Wireless tab: pairing card -->
+    <string name="pair_title">Associer un ordinateur</string>
+    <string name="pair_shizuku_permission">Shizuku est en cours d\'exécution. Autorisez DevSwitch à l\'utiliser ; l\'association et la liste des ordinateurs associés fonctionneront alors ici.</string>
+    <string name="pair_grant_shizuku">Accorder l\'accès à Shizuku</string>
+    <string name="pair_shizuku_not_running">Shizuku est installé mais pas démarré. Démarrez-le, puis rouvrez cet onglet.</string>
+    <string name="pair_open_shizuku">Ouvrir Shizuku</string>
+    <string name="pair_android_settings">Paramètres Android</string>
+    <string name="pair_needs_shizuku">Générer un code d\'association nécessite l\'identité shell, que DevSwitch obtient par Shizuku, de la même façon qu\'il s\'accorde sa propre autorisation. Configurez Shizuku dans l\'onglet Interrupteurs, ou associez depuis l\'écran d\'Android.</string>
+    <string name="pair_open_dev_options">Ouvrir les Options pour les développeurs</string>
+    <string name="pair_intro">Associez un ordinateur par Wi-Fi. Affichez un code à saisir dans adb pair, ou scannez le QR affiché par Android Studio.</string>
+    <string name="pair_with_code">Associer avec un code</string>
+    <string name="pair_scan_studio_qr">Scanner le QR de Studio</string>
+    <string name="pair_paired_computers">Ordinateurs associés</string>
+    <string name="pair_unpair">Dissocier</string>
+    <string name="pair_unpair_title">Dissocier %1$s ?</string>
+    <string name="pair_unpair_body">Si c\'est l\'ordinateur par lequel vous êtes connecté, cette connexion sera coupée et il devra être associé de nouveau.</string>
+    <string name="pair_scanned_finishing">Code d\'Android Studio scanné. Fin de l\'association sur cet appareil.</string>
+    <string name="pair_code_instructions">Sur l\'ordinateur, exécutez ceci et saisissez le code. Dans Android Studio, utilisez Pair using pairing code, choisissez cet appareil et saisissez-le.</string>
+    <string name="pair_adb_pair_cmd">adb pair %1$s</string>
+    <string name="pair_port_placeholder">&lt;le port d\'association apparaît ici&gt;</string>
+    <string name="pair_code_label">Code d\'association</string>
+    <string name="pair_waiting_studio">En attente d\'Android Studio…</string>
+    <string name="pair_waiting_computer">En attente de l\'association d\'un ordinateur…</string>
+    <string name="pair_stop">Arrêter</string>
+    <string name="pair_state_connected">Connecté</string>
+    <string name="pair_state_paired">Associé</string>
+
+    <!-- Wireless tab: network list -->
+    <string name="network_title">Sur ce réseau</string>
+    <string name="network_none">Aucun autre appareil adb trouvé. Les appareils apparaissent ici tant que leur débogage sans fil est activé et qu\'ils sont sur ce Wi-Fi.</string>
+    <string name="network_resolving">résolution…</string>
+
+    <!-- QR scanner -->
+    <string name="scanner_instruction">Dans Android Studio, ouvrez Pair using QR code, puis pointez l\'appareil photo dessus.</string>
+    <string name="scanner_wrong_qr">Ce n\'est pas un QR d\'association Android. Continuez à chercher celui qu\'affiche Android Studio.</string>
+
+    <!-- Pairing messages, resolved on screen from the view model -->
+    <string name="msg_camera_permission">L\'autorisation Appareil photo est nécessaire pour scanner le QR.</string>
+    <string name="msg_lost_shizuku">Le contact avec Shizuku a été perdu, l\'association s\'est donc arrêtée.</string>
+    <string name="msg_paired_with">Associé à %1$s</string>
+    <string name="msg_pairing_finished">Association terminée.</string>
+    <string name="msg_pairing_timeout">L\'association a expiré. Recommencez pour réessayer.</string>
+    <string name="pair_error_timeout">Impossible de démarrer l\'association. Shizuku a mis trop de temps à répondre.</string>
+    <string name="pair_error_no_response">Impossible de démarrer l\'association. Le service de Shizuku n\'a pas répondu. Shizuku est-il toujours en cours d\'exécution ?</string>
+    <string name="pair_error_unavailable">Impossible de démarrer l\'association. Le service adb n\'est pas accessible sur cet appareil.</string>
+    <string name="pair_error_not_permitted">Impossible de démarrer l\'association. Non autorisé. Vérifiez que l\'accès à Shizuku est toujours accordé.</string>
+    <string name="pair_error_generic">Impossible de démarrer l\'association. Consultez le journal pour plus de détails.</string>
+</resources>
