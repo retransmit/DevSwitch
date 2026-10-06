@@ -1,0 +1,2 @@
+- Interfaz en español y en francés
+- El idioma de la app se puede elegir por separado en los ajustes de Android (Android 13 y posteriores)

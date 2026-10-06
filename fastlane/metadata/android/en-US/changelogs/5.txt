@@ -1,0 +1,2 @@
+- Spanish and French interface
+- The app language can be chosen per app in Android's settings (Android 13 and newer)

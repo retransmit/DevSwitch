@@ -1,0 +1,2 @@
+- Interface en espagnol et en français
+- La langue de l'appli peut être choisie séparément dans les paramètres d'Android (Android 13 et versions ultérieures)
