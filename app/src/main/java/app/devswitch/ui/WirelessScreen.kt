@@ -8,7 +8,10 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
+import android.os.PersistableBundle
 import android.provider.Settings
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -309,7 +312,7 @@ private fun PairingActive(session: PairingSession, endpoint: String?, onStop: ()
                 style = MaterialTheme.typography.bodyLarge,
                 fontFamily = FontFamily.Monospace,
             )
-            InfoRow(stringResource(R.string.pair_code_label), session.code, copyText = session.code)
+            InfoRow(stringResource(R.string.pair_code_label), session.code, copyText = session.code, sensitive = true)
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
             CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
@@ -377,14 +380,13 @@ private fun NetworkDevicesCard(devices: List<DiscoveredService>, scanning: Boole
 }
 
 @Composable
-private fun InfoRow(label: String, value: String, copyText: String? = null) {
+private fun InfoRow(label: String, value: String, copyText: String? = null, sensitive: Boolean = false) {
     val context = LocalContext.current
     val modifier = if (copyText != null) {
         Modifier
             .fillMaxWidth()
-            .clickable {
-                context.getSystemService(ClipboardManager::class.java)
-                    ?.setPrimaryClip(ClipData.newPlainText(label, copyText))
+            .clickable(onClickLabel = stringResource(R.string.copy)) {
+                copyToClipboard(context, label, copyText, sensitive)
             }
     } else {
         Modifier.fillMaxWidth()
@@ -397,6 +399,23 @@ private fun InfoRow(label: String, value: String, copyText: String? = null) {
             modifier = Modifier.weight(1f),
         )
         Text(value, style = MaterialTheme.typography.bodyMedium, fontFamily = FontFamily.Monospace)
+    }
+}
+
+/**
+ * Sensitive clips are hidden from the clipboard preview on Android 13 and newer, which also shows
+ * its own confirmation, so the toast is only needed on older versions.
+ */
+private fun copyToClipboard(context: android.content.Context, label: String, text: String, sensitive: Boolean) {
+    val clip = ClipData.newPlainText(label, text)
+    if (sensitive) {
+        clip.description.extras = PersistableBundle().apply {
+            putBoolean("android.content.extra.IS_SENSITIVE", true)
+        }
+    }
+    context.getSystemService(ClipboardManager::class.java)?.setPrimaryClip(clip) ?: return
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+        Toast.makeText(context, R.string.copied, Toast.LENGTH_SHORT).show()
     }
 }
 

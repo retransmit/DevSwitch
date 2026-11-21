@@ -20,6 +20,8 @@
     <string name="setup_body">Android only lets an app change these settings if it holds WRITE_SECURE_SETTINGS, which cannot be requested with a dialog. Grant it once with any option below. It survives reboots and app updates.</string>
     <string name="setup_adb_step">From a computer with ADB (USB debugging has to be on for this one step):</string>
     <string name="copy_command">Copy command</string>
+    <string name="copy">Copy</string>
+    <string name="copied">Copied</string>
     <string name="setup_shizuku_step">Or on this phone, without a computer:</string>
     <string name="shizuku_get">Get Shizuku</string>
     <string name="shizuku_start">Start Shizuku</string>
