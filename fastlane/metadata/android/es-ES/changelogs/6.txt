@@ -1,0 +1,1 @@
+- Toca una dirección, un puerto o el código de vinculación en la pestaña Inalámbrico para copiarlo

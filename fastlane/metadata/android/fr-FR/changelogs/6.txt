@@ -1,0 +1,1 @@
+- Touchez une adresse, un port ou le code d'association dans l'onglet Sans fil pour le copier
