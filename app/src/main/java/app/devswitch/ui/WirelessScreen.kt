@@ -4,11 +4,17 @@
 package app.devswitch.ui
 
 import android.Manifest
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
+import android.os.PersistableBundle
 import android.provider.Settings
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -143,13 +149,17 @@ private fun ThisDeviceCard(
                 Text(stringResource(R.string.wireless_no_wifi), style = MaterialTheme.typography.bodyMedium)
             } else {
                 val ip = network.primaryIpv4
-                InfoRow(stringResource(R.string.wireless_ip), ip ?: stringResource(R.string.wireless_unknown))
+                InfoRow(stringResource(R.string.wireless_ip), ip ?: stringResource(R.string.wireless_unknown), copyText = ip)
                 when {
-                    connect != null ->
-                        InfoRow(stringResource(R.string.wireless_debugging), "${connect.host}:${connect.port}")
+                    connect != null -> {
+                        val address = "${connect.host}:${connect.port}"
+                        InfoRow(stringResource(R.string.wireless_debugging), address, copyText = address)
+                    }
                     // The framework's own port answers before mDNS resolves, when Shizuku can ask it.
-                    fallbackPort > 0 && ip != null ->
-                        InfoRow(stringResource(R.string.wireless_debugging), "$ip:$fallbackPort")
+                    fallbackPort > 0 && ip != null -> {
+                        val address = "$ip:$fallbackPort"
+                        InfoRow(stringResource(R.string.wireless_debugging), address, copyText = address)
+                    }
                     else -> Text(
                         stringResource(R.string.wireless_off_hint),
                         style = MaterialTheme.typography.bodySmall,
@@ -157,7 +167,8 @@ private fun ThisDeviceCard(
                     )
                 }
                 if (pairing != null) {
-                    InfoRow(stringResource(R.string.wireless_pairing_port), "${pairing.host}:${pairing.port}")
+                    val address = "${pairing.host}:${pairing.port}"
+                    InfoRow(stringResource(R.string.wireless_pairing_port), address, copyText = address)
                 }
             }
         }
@@ -301,7 +312,7 @@ private fun PairingActive(session: PairingSession, endpoint: String?, onStop: ()
                 style = MaterialTheme.typography.bodyLarge,
                 fontFamily = FontFamily.Monospace,
             )
-            InfoRow(stringResource(R.string.pair_code_label), session.code)
+            InfoRow(stringResource(R.string.pair_code_label), session.code, copyText = session.code, sensitive = true)
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
             CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
@@ -369,8 +380,18 @@ private fun NetworkDevicesCard(devices: List<DiscoveredService>, scanning: Boole
 }
 
 @Composable
-private fun InfoRow(label: String, value: String) {
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+private fun InfoRow(label: String, value: String, copyText: String? = null, sensitive: Boolean = false) {
+    val context = LocalContext.current
+    val modifier = if (copyText != null) {
+        Modifier
+            .fillMaxWidth()
+            .clickable(onClickLabel = stringResource(R.string.copy)) {
+                copyToClipboard(context, label, copyText, sensitive)
+            }
+    } else {
+        Modifier.fillMaxWidth()
+    }
+    Row(modifier, verticalAlignment = Alignment.CenterVertically) {
         Text(
             label,
             style = MaterialTheme.typography.bodyMedium,
@@ -378,6 +399,23 @@ private fun InfoRow(label: String, value: String) {
             modifier = Modifier.weight(1f),
         )
         Text(value, style = MaterialTheme.typography.bodyMedium, fontFamily = FontFamily.Monospace)
+    }
+}
+
+/**
+ * Sensitive clips are hidden from the clipboard preview on Android 13 and newer, which also shows
+ * its own confirmation, so the toast is only needed on older versions.
+ */
+private fun copyToClipboard(context: android.content.Context, label: String, text: String, sensitive: Boolean) {
+    val clip = ClipData.newPlainText(label, text)
+    if (sensitive) {
+        clip.description.extras = PersistableBundle().apply {
+            putBoolean("android.content.extra.IS_SENSITIVE", true)
+        }
+    }
+    context.getSystemService(ClipboardManager::class.java)?.setPrimaryClip(clip) ?: return
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+        Toast.makeText(context, R.string.copied, Toast.LENGTH_SHORT).show()
     }
 }
 

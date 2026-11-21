@@ -20,6 +20,8 @@
     <string name="setup_body">Android 僅允許擁有 WRITE_SECURE_SETTINGS 權限的應用程式變更這些設定，且該權限無法透過對話框授予。請透過以下任一方式授權一次，重新開機與應用程式更新後依然有效。</string>
     <string name="setup_adb_step">在已安裝 ADB 的電腦上（此步驟需開啟 USB 偵錯）：</string>
     <string name="copy_command">複製指令</string>
+    <string name="copy">複製</string>
+    <string name="copied">已複製</string>
     <string name="setup_shizuku_step">或在此手機上執行（無需電腦）：</string>
     <string name="shizuku_get">取得 Shizuku</string>
     <string name="shizuku_start">啟動 Shizuku</string>
